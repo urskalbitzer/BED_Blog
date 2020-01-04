@@ -20,6 +20,7 @@ image:
   focal_point: 'Center'
   preview_only: false
 projects: []
+commentable: true
 ---
 
 
@@ -126,7 +127,7 @@ plot_beta &lt;- function(x, alpha_beta, main = &quot;&quot;, xlab = &quot;&quot;
   
   # S2
   plot_beta(x, bgr, main = &quot;Between-group - S2&quot;,
-            ylab = &quot;Prob. density&quot;)
+            ylab = &quot;Prob. density function&quot;)
   plot_beta(x, bcgr_2, main = &quot;Between close-groups - S2&quot;,
             xlab = &quot;Association Index&quot;)
   plot_beta(x, wgr_2, main = &quot;Within-group - S2&quot;)
@@ -147,7 +148,7 @@ plot_beta &lt;- function(x, alpha_beta, main = &quot;&quot;, xlab = &quot;&quot;
   
 }</code></pre>
 <p><img src="/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<p>These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and scenarios. For S1 and S2, group A and B are defined as the close groups.</p>
+<p>These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from the different distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and for all scenarios. For S1 and S2, group A and B are defined as the close groups.</p>
 <pre class="r"><code>get_weights &lt;- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
   # Create empty vector for all weights
   weights = rep(NA_real_, time = nrow(network_df))
