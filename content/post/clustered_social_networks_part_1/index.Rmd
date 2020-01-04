@@ -129,7 +129,7 @@ plot_beta <- function(x, alpha_beta, main = "", xlab = "", ylab = "", ...){
   
   # S2
   plot_beta(x, bgr, main = "Between-group - S2",
-            ylab = "Prob. density")
+            ylab = "Prob. density function")
   plot_beta(x, bcgr_2, main = "Between close-groups - S2",
             xlab = "Association Index")
   plot_beta(x, wgr_2, main = "Within-group - S2")
