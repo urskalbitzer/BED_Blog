@@ -152,7 +152,7 @@ plot_beta <- function(x, alpha_beta, main = "", xlab = "", ylab = "", ...){
 }
 ```
 
-These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and scenarios. For S1 and S2, group A and B are defined as the close groups.
+These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from the different distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and for all scenarios. For S1 and S2, group A and B are defined as the close groups.
 ```{r}
 get_weights <- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
   # Create empty vector for all weights
