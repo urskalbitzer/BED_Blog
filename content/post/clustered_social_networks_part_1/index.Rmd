@@ -20,6 +20,7 @@ image:
   focal_point: 'Center'
   preview_only: false
 projects: []
+commentable: true
 ---
 
 Social networks often exhibit some kind of clustering (or _community structure_), such as distinct social groups in animal societies, or kin groups (or families) within social groups. Individuals within such clusters are more likely to interact with each other than individuals from different clusters.  
