@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>igraph | Behaviour | Environment | Data</title>
+    <link>/tags/igraph/</link>
+      <atom:link href="/tags/igraph/index.xml" rel="self" type="application/rss+xml" />
+    <description>igraph</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Tue, 31 Dec 2019 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/img/icon-192.png</url>
+      <title>igraph</title>
+      <link>/tags/igraph/</link>
+    </image>
+    
+    <item>
+      <title>Creation and Detection of Clusters in Social Networks - Part 1</title>
+      <link>/post/social-clusters-i/</link>
+      <pubDate>Tue, 31 Dec 2019 00:00:00 +0000</pubDate>
+      <guid>/post/social-clusters-i/</guid>
+      <description>
+
+
+&lt;p&gt;Social networks often exhibit some kind of clustering (or &lt;em&gt;community structure&lt;/em&gt;), such as distinct social groups in animal societies, or kin groups (or families) within social groups. Individuals within such clusters are more likely to interact with each other than individuals from different clusters.&lt;/p&gt;
+&lt;p&gt;There are many algorithms to detect clusters in social networks, and one might work better than another under some circumstances (see, e.g., &lt;a href=&#34;https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0159161&#34;&gt;Emmons et al. 2016&lt;/a&gt;). Therefore, the aim of this and the next post is to simulate clustered social networks, and then to apply and compare some of the methods provided by the R-package &lt;code&gt;igraph&lt;/code&gt; with these networks.&lt;/p&gt;
+&lt;p&gt;Note that there are functions available for R to create such networks, but here I create these networks ‘from scratch’ for two reasons:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;It is easier to understand (and modify) the process underlying the network simulation.&lt;/li&gt;
+&lt;li&gt;Some clusters might be ‘closer’ to each other than other clusters. For example, individuals from two close families might be more likely to interact with each other than with individuals from other families. Perhaps, this can be achieved with the available functions, but I preferred to model these different degrees of clustering on my own.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This project will consist of two parts:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. Simulate clustered social networks.&lt;/strong&gt; I will simulate values of an ‘association index’ (reflecting social relationships) for dyads of individuals within the same groups, for dyads of individuals from ‘close’ groups, and for dyads consisting of individuals from different groups that are not close to each other. In total, I will simulate four different scenarios with varying degrees of clustering.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. Determine clustering using different methods and compare the results.&lt;/strong&gt; I will use several of the methods provided by the &lt;code&gt;igraph&lt;/code&gt; package to detect clusters in these simulated networks. Then, I will calculate and compare the modularity of different networks, the number of detected clusters in comparison to simulated clusters, and the proportion of dyads correctly assigned to the same cluster.&lt;/p&gt;
+&lt;div id=&#34;simulate-clustered-social-networks&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;1. Simulate clustered social networks&lt;/h1&gt;
+&lt;div id=&#34;prepare-r&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;1.1 Prepare R&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rm(list = ls())
+library(tidyverse)
+library(tidygraph)
+library(ggraph)
+library(igraph)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;create-a-dataframe-with-identities-and-group-memberships-of-individuals&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;1.2 Create a dataframe with identities and group memberships of individuals&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Specify number of individuals and groups (or clusters)
+n_inds &amp;lt;- 50
+n_groups &amp;lt;- 4
+
+# Create IDs for all individuals and assign random social groups to individuals
+set.seed(1209)
+individual_df &amp;lt;- tibble(
+  Ind = paste0(&amp;quot;ind_&amp;quot;, str_pad(1:n_inds, width = nchar(n_inds), pad = &amp;quot;0&amp;quot;)),
+  Group = sample(x = paste0(&amp;quot;group_&amp;quot;, letters[1:n_groups]),
+                 size = n_inds,
+                 replace = T))
+
+# Create a dataframe with all possible combinations of individuals except &amp;#39;self-relationships&amp;#39;
+network_df &amp;lt;- expand.grid(Ind_A = individual_df$Ind,
+                          Ind_B = individual_df$Ind,
+                          stringsAsFactors = F) %&amp;gt;%
+  left_join(select(individual_df, Ind_A = Ind, Ind_A_Group = Group),
+            by = &amp;quot;Ind_A&amp;quot;) %&amp;gt;% 
+  left_join(select(individual_df, Ind_B = Ind, Ind_B_Group = Group),
+            by = &amp;quot;Ind_B&amp;quot;) %&amp;gt;% 
+  filter(Ind_A != Ind_B)
+
+# Limit the dataframe to one row per dyad for an undirected network
+network_df &amp;lt;- network_df %&amp;gt;% 
+  arrange(Ind_A, Ind_B) %&amp;gt;% 
+  mutate(dyad = if_else(Ind_A &amp;lt; Ind_B, paste0(Ind_A, &amp;quot;_&amp;quot;, Ind_B),
+                        paste0(Ind_B, &amp;quot;_&amp;quot;, Ind_A))) %&amp;gt;% 
+  distinct(dyad, .keep_all = T)
+
+head(network_df)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    Ind_A  Ind_B Ind_A_Group Ind_B_Group          dyad
+## 1 ind_01 ind_02     group_b     group_a ind_01_ind_02
+## 2 ind_01 ind_03     group_b     group_c ind_01_ind_03
+## 3 ind_01 ind_04     group_b     group_b ind_01_ind_04
+## 4 ind_01 ind_05     group_b     group_d ind_01_ind_05
+## 5 ind_01 ind_06     group_b     group_a ind_01_ind_06
+## 6 ind_01 ind_07     group_b     group_b ind_01_ind_07&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;assign-values-or-weights-to-all-dyadic-relationships.&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;1.3 Assign values (or ‘weights’) to all dyadic relationships.&lt;/h3&gt;
+&lt;p&gt;Here, I use 4 different scenarios:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. Scenario (S1):&lt;/strong&gt; Within-group relationships (&lt;em&gt;wgr&lt;/em&gt;) are relatively strong in comparison to between-group relationships (&lt;em&gt;bgr&lt;/em&gt;). Relationships of individuals between ‘close groups’ (&lt;em&gt;bcgr&lt;/em&gt;) are intermediate.&lt;br /&gt;
+&lt;strong&gt;2. Scenario (S2):&lt;/strong&gt; Similar to S1, but differences between &lt;em&gt;wgr&lt;/em&gt;, &lt;em&gt;bcgr&lt;/em&gt;, and &lt;em&gt;bgr&lt;/em&gt; are smaller.&lt;br /&gt;
+&lt;strong&gt;3. Scenario (S3):&lt;/strong&gt; &lt;em&gt;Wgr&lt;/em&gt; are relatively strong in comparison to &lt;em&gt;bgr&lt;/em&gt;. This scenario is identical to S1 except that there are no close groups.&lt;br /&gt;
+&lt;strong&gt;4. Scenario (S4):&lt;/strong&gt; Differences between &lt;em&gt;wgr&lt;/em&gt; and &lt;em&gt;bgr&lt;/em&gt; are smaller than in S3. This scenario is identical to S2 except that there are no close groups.&lt;/p&gt;
+&lt;p&gt;Thus, &lt;em&gt;bgr&lt;/em&gt; are the same in all four scenarios, only &lt;em&gt;bcgr&lt;/em&gt; and &lt;em&gt;wgr&lt;/em&gt; are varied. Furthermore, &lt;em&gt;wgr&lt;/em&gt; are the same for S1 and S3, and for S2 and S4 (see plot below).&lt;/p&gt;
+&lt;p&gt;To create the social networks, I sample values from beta distributions simulating an &lt;strong&gt;Association Index&lt;/strong&gt;. Such an index is commonly used in animal behavioural research to assess relationships between individuals (see, e.g., the great book by &lt;a href=&#34;https://www.press.uchicago.edu/ucp/books/book/chicago/A/bo5607202.html&#34;&gt;Whitehead, 2008&lt;/a&gt;), and they range from 0 to 1. For example, individuals that never associate with each other would have an association index of 0, and two individuals that are always associated with each other have an index of 1.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Set the parameters (i.e. shape parameters of the beta distribution) for all 4
+# scenarios
+bgr &amp;lt;- c(1, 8)
+bcgr_1 &amp;lt;- c(3, 8)
+wgr_1 &amp;lt;- wgr_3 &amp;lt;- c(8, 8)
+
+bcgr_2 &amp;lt;- c(1.5, 8)
+wgr_2 &amp;lt;- wgr_4 &amp;lt;- c(4, 8)
+
+# Define function for plotting of beta distributions
+plot_beta &amp;lt;- function(x, alpha_beta, main = &amp;quot;&amp;quot;, xlab = &amp;quot;&amp;quot;, ylab = &amp;quot;&amp;quot;, ...){
+  alpha = alpha_beta[1]
+  beta =  alpha_beta[2]
+  plot(x, dbeta(x, alpha, beta), type = &amp;quot;l&amp;quot;,
+       yaxt = &amp;quot;n&amp;quot;, xlab = &amp;quot;&amp;quot;, ylab = &amp;quot;&amp;quot;, bty = &amp;quot;n&amp;quot;, ...)
+  title(ylab = ylab, line = 0)
+  title(xlab = xlab, line = 2)
+  title(main = main, line = 1)
+  axis(side = 2, label = F, lwd.ticks = F)
+}
+# Plot the distributions of social relationships according to these parameters
+{
+  par(mfrow = c(4,3), mar = c(3, 2, 2, 1))
+  x &amp;lt;- seq(0, 1, length.out = 40)
+  
+  # S1
+  plot_beta(x, bgr, main = &amp;quot;Between-group - S1&amp;quot;,
+            ylab = &amp;quot;Prob. density function&amp;quot;)
+  plot_beta(x, bcgr_1, main = &amp;quot;Between close-groups - S1&amp;quot;)
+  plot_beta(x, wgr_1, main = &amp;quot;Within-group S1&amp;quot;)
+  
+  # S2
+  plot_beta(x, bgr, main = &amp;quot;Between-group - S2&amp;quot;,
+            ylab = &amp;quot;Prob. density&amp;quot;)
+  plot_beta(x, bcgr_2, main = &amp;quot;Between close-groups - S2&amp;quot;,
+            xlab = &amp;quot;Association Index&amp;quot;)
+  plot_beta(x, wgr_2, main = &amp;quot;Within-group - S2&amp;quot;)
+  
+  # S3
+  plot_beta(x, bgr, main = &amp;quot;Between-group - S3&amp;quot;,
+            ylab = &amp;quot;Prob. density function&amp;quot;)
+  plot.new()
+  plot_beta(x, wgr_3, main = &amp;quot;Within-group - S3&amp;quot;)
+  
+  # S4
+  plot_beta(x, bgr, main = &amp;quot;Between-group - S4&amp;quot;, 
+            ylab = &amp;quot;Prob. density function&amp;quot;,
+            xlab = &amp;quot;Association Index&amp;quot;)
+  plot.new()
+  plot_beta(x, wgr_4, main = &amp;quot;Within-group - S4&amp;quot;,
+            xlab = &amp;quot;Association Index&amp;quot;)
+  
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and scenarios. For S1 and S2, group A and B are defined as the close groups.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_weights &amp;lt;- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
+  # Create empty vector for all weights
+  weights = rep(NA_real_, time = nrow(network_df))
+  # Go through all dyads and sample from respective distribution, dependent on
+  # the group membership of both individuals
+  for(i in seq_along(weights)){
+    ind_A_group &amp;lt;- network_df[i, &amp;quot;Ind_A_Group&amp;quot;]
+    ind_B_group &amp;lt;- network_df[i, &amp;quot;Ind_B_Group&amp;quot;]
+    # Both individuals in same group
+    if(ind_A_group == ind_B_group){
+      weights[i] &amp;lt;- rbeta(n = 1, shape1 = wgr[1], shape2 = wgr[2])
+    }
+    # Individuals in different groups
+    if(ind_A_group != ind_B_group){
+      weights[i] &amp;lt;- rbeta(n = 1, shape1 = bgr[1], shape2 = bgr[2])
+    }
+    # If some groups are &amp;#39;closer&amp;#39; to each other, use specified distributions for
+    # this kind of relationships
+    if(all(!is.na(bcgr)) &amp;amp; all(!is.na(close_groups)) &amp;amp;
+       ind_A_group != ind_B_group &amp;amp;
+       ind_A_group %in% close_groups &amp;amp; 
+       ind_B_group %in% close_groups){
+      weights[i] &amp;lt;- rbeta(n = 1, shape1 = bcgr[1], shape2 = bcgr[2])
+      }
+  }
+  return(weights)
+}
+
+set.seed(1209)
+network_df$S1 &amp;lt;- get_weights(network_df, wgr = wgr_1, bgr = bgr, bcgr = bcgr_1,
+                             close_groups = c(&amp;quot;group_a&amp;quot;, &amp;quot;group_b&amp;quot;))
+network_df$S2 &amp;lt;- get_weights(network_df, wgr = wgr_2, bgr = bgr, bcgr = bcgr_2,
+                             close_groups = c(&amp;quot;group_a&amp;quot;, &amp;quot;group_b&amp;quot;))
+network_df$S3 &amp;lt;- get_weights(network_df, wgr = wgr_3, bgr = bgr)
+network_df$S4 &amp;lt;- get_weights(network_df, wgr = wgr_4, bgr = bgr)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As the last step for part 1 of this post, I will illustrate the created networks using the &lt;code&gt;ggraph&lt;/code&gt; package (look &lt;a href=&#34;https://www.data-imaginist.com/2019/1-giraffe-2-giraffe-go/&#34;&gt;here&lt;/a&gt; for an introduction to this package by the author)&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;set.seed(1209)
+clustered_network_plot &amp;lt;- network_df %&amp;gt;% 
+  pivot_longer(cols = matches(&amp;quot;S\\d&amp;quot;),
+               names_to = &amp;quot;Scenario&amp;quot;,
+               values_to = &amp;quot;weight&amp;quot;) %&amp;gt;% 
+  select(from = Ind_A, to = Ind_B, weight, Scenario) %&amp;gt;% 
+  filter(weight &amp;gt;= 0.3) %&amp;gt;% 
+  as_tbl_graph() %&amp;gt;% 
+  activate(nodes) %&amp;gt;% 
+  left_join(distinct(individual_df, name = Ind, group = Group),
+            by = &amp;quot;name&amp;quot;) %&amp;gt;% 
+  ggraph(., layout = &amp;quot;fr&amp;quot;) +
+  geom_edge_arc(aes(width = weight),
+                alpha = 0.4, strength = 0.1) +
+  scale_edge_width(name = &amp;quot;Association Index&amp;quot;,
+                   range = c(0.2, 1)) +
+  geom_node_point(aes(fill = group, shape = group),
+                  size = 2) +
+  scale_fill_brewer(type = &amp;quot;qual&amp;quot;, palette = 2) +
+  scale_shape_manual(values = c(21, 22, 23, 24)) +
+  facet_edges(~Scenario) +
+  theme_graph()
+
+clustered_network_plot&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
+As modeled above, S1 and S3 are very similar, except that group A and B are closer to each other in S1. S2 and S4 have both weaker within-group relationships compared to their counterparts S1 and S3, respectively. Thus, I have four different networks with different degrees of clustering, and in two of these networks, two of the four groups are closer to each other than to the other groups.&lt;/p&gt;
+&lt;p&gt;In the next post, I will use different algorithms from the &lt;code&gt;igraph&lt;/code&gt; package to check how well these clusters can be detected.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
