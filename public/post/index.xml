@@ -2,25 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts | Behaviour | Environment | Data</title>
-    <link>/post/</link>
-      <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://bedatablog.netlify.com/post/</link>
+      <atom:link href="https://bedatablog.netlify.com/post/index.xml" rel="self" type="application/rss+xml" />
     <description>Posts</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Sun, 05 Jan 2020 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
+      <url>https://bedatablog.netlify.com/img/icon-192.png</url>
       <title>Posts</title>
-      <link>/post/</link>
+      <link>https://bedatablog.netlify.com/post/</link>
     </image>
     
     <item>
       <title>Creation and Detection of Clusters in Social Networks - Part 2</title>
-      <link>/content/post/social-clusters-ii/</link>
+      <link>https://bedatablog.netlify.com/post/social-clusters-ii/</link>
       <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>/content/post/social-clusters-ii/</guid>
+      <guid>https://bedatablog.netlify.com/post/social-clusters-ii/</guid>
       <description>
 
 
-&lt;p&gt;In the &lt;a href=&#34;/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the &lt;code&gt;igraph&lt;/code&gt; package to test how well these simulated clusters can be (re)-detected.&lt;/p&gt;
+&lt;p&gt;In the &lt;a href=&#34;https://bedatablog.netlify.com/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the &lt;code&gt;igraph&lt;/code&gt; package to test how well these simulated clusters can be (re)-detected.&lt;/p&gt;
 &lt;div id=&#34;determine-clustering-using-different-methods-and-compare-the-results&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;2. Determine clustering using different methods and compare the results&lt;/h1&gt;
 &lt;div id=&#34;prepare-r&#34; class=&#34;section level3&#34;&gt;
@@ -34,9 +34,9 @@ library(igraph)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;recreate-the-network-from-previous-post&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;2.2 Recreate the network from previous post&lt;/h3&gt;
-&lt;p&gt;To avoid repetition, the code is not shown here, but can be copied from the &lt;a href=&#34;/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;. The two objects that are required from there are &lt;code&gt;individual_df&lt;/code&gt; and &lt;code&gt;network_df&lt;/code&gt;.&lt;br /&gt;
+&lt;p&gt;To avoid repetition, the code is not shown here, but can be copied from the &lt;a href=&#34;https://bedatablog.netlify.com/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;. The two objects that are required from there are &lt;code&gt;individual_df&lt;/code&gt; and &lt;code&gt;network_df&lt;/code&gt;.&lt;br /&gt;
 The networks looked like that:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;&lt;em&gt;One important note&lt;/em&gt;:&lt;/strong&gt; My motivation for this small project was my research on a group of ~50 adult red colobus monkeys. Therefore, I simulated networks where most individuals were somehow connected. The plot above, however, only shows association indices &lt;span class=&#34;math inline&#34;&gt;\(\ge\)&lt;/span&gt; 0.3 to make it easier to see the clusters. The complete network is much denser (see the final plot of this post). After finalizing the draft of this post, I realized that this may have affected how well (or not) the algorithms detected the (sub)-groups and therefore wanted to mention it here.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;use-different-algorithms-to-detect-clusters&#34; class=&#34;section level3&#34;&gt;
@@ -57,9 +57,9 @@ network_3 &amp;lt;- df_to_network(network_df, weight_col = &amp;quot;S3&amp;quot
 network_4 &amp;lt;- df_to_network(network_df, weight_col = &amp;quot;S4&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Here’s the standard output for such an object:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;network_1&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## IGRAPH 9f7d641 UNW- 50 1225 -- 
+&lt;pre&gt;&lt;code&gt;## IGRAPH 1485755 UNW- 50 1225 -- 
 ## + attr: name (v/c), weight (e/n)
-## + edges from 9f7d641 (vertex names):
+## + edges from 1485755 (vertex names):
 ##  [1] ind_01--ind_02 ind_01--ind_03 ind_01--ind_04 ind_01--ind_05 ind_01--ind_06
 ##  [6] ind_01--ind_07 ind_01--ind_08 ind_01--ind_09 ind_01--ind_10 ind_01--ind_11
 ## [11] ind_01--ind_12 ind_01--ind_13 ind_01--ind_14 ind_01--ind_15 ind_01--ind_16
@@ -500,7 +500,7 @@ modularity_plot &amp;lt;- create_plot(df = cluster_summary,
                                y_title = &amp;quot;Modularity&amp;quot;)
 
 cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;conclusions&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;2.6 Conclusions&lt;/h3&gt;
@@ -532,7 +532,7 @@ cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&
   scale_shape_manual(values = c(21, 22, 23, 24)) +
   theme_graph() +
   guides(fill = guide_legend(override.aes = list(shape=21)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;It’s clear from this plot that group_a and group_b are put in the same cluster by the &lt;em&gt;louvain&lt;/em&gt; method.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -541,9 +541,9 @@ cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&
     
     <item>
       <title>Creation and Detection of Clusters in Social Networks - Part 1</title>
-      <link>/content/post/social-clusters-i/</link>
+      <link>https://bedatablog.netlify.com/post/social-clusters-i/</link>
       <pubDate>Tue, 31 Dec 2019 00:00:00 +0000</pubDate>
-      <guid>/content/post/social-clusters-i/</guid>
+      <guid>https://bedatablog.netlify.com/post/social-clusters-i/</guid>
       <description>
 
 
@@ -669,7 +669,7 @@ plot_beta &amp;lt;- function(x, alpha_beta, main = &amp;quot;&amp;quot;, xlab = 
             xlab = &amp;quot;Association Index&amp;quot;)
   
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from the different distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and for all scenarios. For S1 and S2, group A and B are defined as the close groups.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_weights &amp;lt;- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
   # Create empty vector for all weights
@@ -731,7 +731,7 @@ clustered_network_plot &amp;lt;- network_df %&amp;gt;%
   theme_graph()
 
 clustered_network_plot&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
 As modeled above, S1 and S3 are very similar, except that group A and B are closer to each other in S1. S2 and S4 have both weaker within-group relationships compared to their counterparts S1 and S3, respectively. Thus, I have four different networks with different degrees of clustering, and in two of these networks, two of the four groups are closer to each other than to the other groups.&lt;/p&gt;
 &lt;p&gt;In the next post, I will use different algorithms from the &lt;code&gt;igraph&lt;/code&gt; package to check how well these clusters can be detected.&lt;/p&gt;
 &lt;/div&gt;

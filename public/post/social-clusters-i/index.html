@@ -32,7 +32,7 @@
 There are many algorithms to detect clusters in social networks, and one might work better than another under some circumstances (see, e.g., Emmons et al. 2016).">
 
   
-  <link rel="alternate" hreflang="en-us" href="/post/social-clusters-i/">
+  <link rel="alternate" hreflang="en-us" href="https://bedatablog.netlify.com/post/social-clusters-i/">
 
   
 
@@ -44,6 +44,9 @@ There are many algorithms to detect clusters in social networks, and one might w
   
 
   
+  
+  
+  <script src="/js/mathjax-config.js"></script>
   
 
   
@@ -168,9 +171,9 @@ There are many algorithms to detect clusters in social networks, and one might w
 
       
       
-        
-      
 
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
       
     
       
@@ -209,7 +212,7 @@ There are many algorithms to detect clusters in social networks, and one might w
   <link rel="icon" type="image/png" href="/img/icon-32.png">
   <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
 
-  <link rel="canonical" href="/post/social-clusters-i/">
+  <link rel="canonical" href="https://bedatablog.netlify.com/post/social-clusters-i/">
 
   
   
@@ -221,11 +224,11 @@ There are many algorithms to detect clusters in social networks, and one might w
   <meta property="twitter:card" content="summary_large_image">
   
   <meta property="og:site_name" content="Behaviour | Environment | Data">
-  <meta property="og:url" content="/post/social-clusters-i/">
+  <meta property="og:url" content="https://bedatablog.netlify.com/post/social-clusters-i/">
   <meta property="og:title" content="Creation and Detection of Clusters in Social Networks - Part 1 | Behaviour | Environment | Data">
   <meta property="og:description" content="Social networks often exhibit some kind of clustering (or community structure), such as distinct social groups in animal societies, or kin groups (or families) within social groups. Individuals within such clusters are more likely to interact with each other than individuals from different clusters.
-There are many algorithms to detect clusters in social networks, and one might work better than another under some circumstances (see, e.g., Emmons et al. 2016)."><meta property="og:image" content="/post/social-clusters-i/featured.png">
-  <meta property="twitter:image" content="/post/social-clusters-i/featured.png"><meta property="og:locale" content="en-us">
+There are many algorithms to detect clusters in social networks, and one might work better than another under some circumstances (see, e.g., Emmons et al. 2016)."><meta property="og:image" content="https://bedatablog.netlify.com/post/social-clusters-i/featured.png">
+  <meta property="twitter:image" content="https://bedatablog.netlify.com/post/social-clusters-i/featured.png"><meta property="og:locale" content="en-us">
   
     
       <meta property="article:published_time" content="2019-12-31T00:00:00&#43;00:00">
@@ -256,12 +259,12 @@ There are many algorithms to detect clusters in social networks, and one might w
   "@type": "BlogPosting",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "/post/social-clusters-i/"
+    "@id": "https://bedatablog.netlify.com/post/social-clusters-i/"
   },
   "headline": "Creation and Detection of Clusters in Social Networks - Part 1",
   
   "image": [
-    "/post/social-clusters-i/featured.png"
+    "https://bedatablog.netlify.com/post/social-clusters-i/featured.png"
   ],
   
   "datePublished": "2019-12-31T00:00:00Z",
@@ -277,7 +280,7 @@ There are many algorithms to detect clusters in social networks, and one might w
     "name": "Behaviour | Environment | Data",
     "logo": {
       "@type": "ImageObject",
-      "url": "/img/icon-512.png"
+      "url": "https://bedatablog.netlify.com/img/icon-512.png"
     }
   },
   "description": "Social networks often exhibit some kind of clustering (or community structure), such as distinct social groups in animal societies, or kin groups (or families) within social groups. Individuals within such clusters are more likely to interact with each other than individuals from different clusters.\nThere are many algorithms to detect clusters in social networks, and one might work better than another under some circumstances (see, e.g., Emmons et al. 2016)."
@@ -683,7 +686,7 @@ plot_beta &lt;- function(x, alpha_beta, main = &quot;&quot;, xlab = &quot;&quot;
             xlab = &quot;Association Index&quot;)
   
 }</code></pre>
-<p><img src="/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from the different distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and for all scenarios. For S1 and S2, group A and B are defined as the close groups.</p>
 <pre class="r"><code>get_weights &lt;- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
   # Create empty vector for all weights
@@ -745,7 +748,7 @@ clustered_network_plot &lt;- network_df %&gt;%
   theme_graph()
 
 clustered_network_plot</code></pre>
-<p><img src="/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+<p><img src="/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
 As modeled above, S1 and S3 are very similar, except that group A and B are closer to each other in S1. S2 and S4 have both weaker within-group relationships compared to their counterparts S1 and S3, respectively. Thus, I have four different networks with different degrees of clustering, and in two of these networks, two of the four groups are closer to each other than to the other groups.</p>
 <p>In the next post, I will use different algorithms from the <code>igraph</code> package to check how well these clusters can be detected.</p>
 </div>
@@ -765,9 +768,9 @@ As modeled above, S1 and S3 are very similar, except that group A and B are clos
   
   <a class="badge badge-light" href="/tags/social-networks/">Social Networks</a>
   
-  <a class="badge badge-light" href="/tags/igraph/">igraph</a>
-  
   <a class="badge badge-light" href="/tags/ggraph/">ggraph</a>
+  
+  <a class="badge badge-light" href="/tags/igraph/">igraph</a>
   
 </div>
 
@@ -784,7 +787,7 @@ As modeled above, S1 and S3 are very similar, except that group A and B are clos
       
       
       <li>
-        <a href="https://twitter.com/intent/tweet?url=/post/social-clusters-i/&amp;text=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201" target="_blank" rel="noopener" class="share-btn-twitter">
+        <a href="https://twitter.com/intent/tweet?url=https://bedatablog.netlify.com/post/social-clusters-i/&amp;text=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201" target="_blank" rel="noopener" class="share-btn-twitter">
           <i class="fab fa-twitter"></i>
         </a>
       </li>
@@ -797,7 +800,7 @@ As modeled above, S1 and S3 are very similar, except that group A and B are clos
       
       
       <li>
-        <a href="https://www.facebook.com/sharer.php?u=/post/social-clusters-i/&amp;t=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201" target="_blank" rel="noopener" class="share-btn-facebook">
+        <a href="https://www.facebook.com/sharer.php?u=https://bedatablog.netlify.com/post/social-clusters-i/&amp;t=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201" target="_blank" rel="noopener" class="share-btn-facebook">
           <i class="fab fa-facebook"></i>
         </a>
       </li>
@@ -810,7 +813,7 @@ As modeled above, S1 and S3 are very similar, except that group A and B are clos
       
       
       <li>
-        <a href="mailto:?subject=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201&amp;body=/post/social-clusters-i/" target="_blank" rel="noopener" class="share-btn-email">
+        <a href="mailto:?subject=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201&amp;body=https://bedatablog.netlify.com/post/social-clusters-i/" target="_blank" rel="noopener" class="share-btn-email">
           <i class="fas fa-envelope"></i>
         </a>
       </li>
@@ -823,7 +826,7 @@ As modeled above, S1 and S3 are very similar, except that group A and B are clos
       
       
       <li>
-        <a href="https://www.linkedin.com/shareArticle?url=/post/social-clusters-i/&amp;title=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201" target="_blank" rel="noopener" class="share-btn-linkedin">
+        <a href="https://www.linkedin.com/shareArticle?url=https://bedatablog.netlify.com/post/social-clusters-i/&amp;title=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201" target="_blank" rel="noopener" class="share-btn-linkedin">
           <i class="fab fa-linkedin-in"></i>
         </a>
       </li>
@@ -836,7 +839,7 @@ As modeled above, S1 and S3 are very similar, except that group A and B are clos
       
       
       <li>
-        <a href="https://web.whatsapp.com/send?text=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201%20/post/social-clusters-i/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+        <a href="https://web.whatsapp.com/send?text=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201%20https://bedatablog.netlify.com/post/social-clusters-i/" target="_blank" rel="noopener" class="share-btn-whatsapp">
           <i class="fab fa-whatsapp"></i>
         </a>
       </li>
@@ -849,7 +852,7 @@ As modeled above, S1 and S3 are very similar, except that group A and B are clos
       
       
       <li>
-        <a href="https://service.weibo.com/share/share.php?url=/post/social-clusters-i/&amp;title=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201" target="_blank" rel="noopener" class="share-btn-weibo">
+        <a href="https://service.weibo.com/share/share.php?url=https://bedatablog.netlify.com/post/social-clusters-i/&amp;title=Creation%20and%20Detection%20of%20Clusters%20in%20Social%20Networks%20-%20Part%201" target="_blank" rel="noopener" class="share-btn-weibo">
           <i class="fab fa-weibo"></i>
         </a>
       </li>
@@ -888,7 +891,7 @@ As modeled above, S1 and S3 are very similar, except that group A and B are clos
     
 
     <div class="media-body">
-      <h5 class="card-title"><a href="/">Urs Kalbitzer</a></h5>
+      <h5 class="card-title"><a href="https://bedatablog.netlify.com/">Urs Kalbitzer</a></h5>
       
       
       <ul class="network-icon" aria-hidden="true">
