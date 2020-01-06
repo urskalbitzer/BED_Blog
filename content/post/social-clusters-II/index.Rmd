@@ -1,0 +1,350 @@
+---
+title: Creation and Detection of Clusters in Social Networks - Part 2
+author: Urs Kalbitzer
+date: '2020-01-05'
+slug: social-clusters-II
+categories: []
+tags:
+  - R
+  - Social Networks
+  - ggraph
+  - igraph
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-01-05T20:00:00-00:00'
+featured: no
+image:
+  placement: 1
+  caption: ''
+  focal_point: 'Center'
+  preview_only: no
+projects: []
+commentable: true
+---
+
+In the [previous post](/social-clusters-I/), I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the `igraph` package to test how well these simulated clusters can be (re)-detected.
+
+# 2. Determine clustering using different methods and compare the results
+### 2.1 Prepare R
+```{r, message = FALSE}
+rm(list = ls())
+library(tidyverse)
+library(tidygraph)
+library(ggraph)
+library(igraph)
+```
+In addition to these packages, this notebook requires the installation of the following packages: `DT`, `cowplot`, `ggrepel`.
+
+### 2.2 Recreate the network from previous post
+
+To avoid repetition, the code is not shown here, but can be copied from the [previous post](/social-clusters-I/). The two objects that are required from there are `individual_df` and `network_df`.  
+The networks looked like that:
+```{r, create_network, include = FALSE}
+# Specify number of individuals and groups (or clusters)
+n_inds <- 50
+n_groups <- 4
+
+# Create IDs for all individuals and assign random social groups to individuals
+set.seed(1209)
+individual_df <- tibble(
+  Ind = paste0("ind_", str_pad(1:n_inds, width = nchar(n_inds), pad = "0")),
+  Group = sample(x = paste0("group_", letters[1:n_groups]),
+                 size = n_inds,
+                 replace = T))
+
+# Create a dataframe with all possible combinations of individuals except 'self-relationships'
+network_df <- expand.grid(Ind_A = individual_df$Ind,
+                          Ind_B = individual_df$Ind,
+                          stringsAsFactors = F) %>%
+  left_join(select(individual_df, Ind_A = Ind, Ind_A_Group = Group),
+            by = "Ind_A") %>% 
+  left_join(select(individual_df, Ind_B = Ind, Ind_B_Group = Group),
+            by = "Ind_B") %>% 
+  filter(Ind_A != Ind_B)
+
+# Limit the dataframe to one row per dyad for an undirected network
+network_df <- network_df %>% 
+  arrange(Ind_A, Ind_B) %>% 
+  mutate(dyad = if_else(Ind_A < Ind_B, paste0(Ind_A, "_", Ind_B),
+                        paste0(Ind_B, "_", Ind_A))) %>% 
+  distinct(dyad, .keep_all = T)
+
+# Set the parameters (i.e. shape parameters of the beta distribution) for all 4
+# scenarios
+bgr <- c(1, 8)
+bcgr_1 <- c(3, 8)
+wgr_1 <- wgr_3 <- c(8, 8)
+bcgr_2 <- c(1.5, 8)
+wgr_2 <- wgr_4 <- c(4, 8)
+
+get_weights <- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
+  # Create empty vector for all weights
+  weights = rep(NA_real_, time = nrow(network_df))
+  # Go through all dyads and sample from respective distribution, dependent on
+  # the group membership of both individuals
+  for(i in seq_along(weights)){
+    ind_A_group <- network_df[i, "Ind_A_Group"]
+    ind_B_group <- network_df[i, "Ind_B_Group"]
+    # Both individuals in same group
+    if(ind_A_group == ind_B_group){
+      weights[i] <- rbeta(n = 1, shape1 = wgr[1], shape2 = wgr[2])
+    }
+    # Individuals in different groups
+    if(ind_A_group != ind_B_group){
+      weights[i] <- rbeta(n = 1, shape1 = bgr[1], shape2 = bgr[2])
+    }
+    # If some groups are 'closer' to each other, use specified distributions for
+    # this kind of relationships
+    if(all(!is.na(bcgr)) & all(!is.na(close_groups)) &
+       ind_A_group != ind_B_group &
+       ind_A_group %in% close_groups & 
+       ind_B_group %in% close_groups){
+      weights[i] <- rbeta(n = 1, shape1 = bcgr[1], shape2 = bcgr[2])
+      }
+  }
+  return(weights)
+}
+
+set.seed(1209)
+network_df$S1 <- get_weights(network_df, wgr = wgr_1, bgr = bgr, bcgr = bcgr_1,
+                             close_groups = c("group_a", "group_b"))
+network_df$S2 <- get_weights(network_df, wgr = wgr_2, bgr = bgr, bcgr = bcgr_2,
+                             close_groups = c("group_a", "group_b"))
+network_df$S3 <- get_weights(network_df, wgr = wgr_3, bgr = bgr)
+network_df$S4 <- get_weights(network_df, wgr = wgr_4, bgr = bgr)
+
+set.seed(1209)
+clustered_network_plot <- network_df %>% 
+  pivot_longer(cols = matches("S\\d"),
+               names_to = "Scenario",
+               values_to = "weight") %>% 
+  select(from = Ind_A, to = Ind_B, weight, Scenario) %>% 
+  filter(weight >= 0.3) %>% 
+  as_tbl_graph(directed = FALSE) %>% 
+  activate(nodes) %>% 
+  left_join(distinct(individual_df, name = Ind, group = Group),
+            by = "name") %>% 
+  ggraph(., layout = "fr") +
+  geom_edge_arc(aes(width = weight),
+                alpha = 0.4, strength = 0.1) +
+  scale_edge_width(name = "Association Index",
+                   range = c(0.2, 1)) +
+  geom_node_point(aes(fill = group, shape = group),
+                  size = 2) +
+  scale_fill_brewer(type = "qual", palette = 2) +
+  scale_shape_manual(values = c(21, 22, 23, 24)) +
+  facet_edges(~Scenario) +
+  theme_graph()
+```
+
+```{r, echo = FALSE}
+clustered_network_plot
+```
+
+**_One important note_:** My motivation for this small project was my research on a group of ~50 adult red colobus monkeys. Therefore, I simulated networks where most individuals were somehow connected. The plot above, however, only shows association indices $\ge$ 0.3 to make it easier to see the clusters. The complete network is much denser (see the final plot of this post). After finalizing the draft of this post, I realized that this may have affected how well (or not) the algorithms detected the (sub)-groups and therefore wanted to mention it here.
+
+### 2.3 Use different algorithms to detect clusters
+
+The `igraph`-package provides several functions to detect communities within a network, which start with `cluster_` (type `?communities` in R for a complete list). Most of these algorithms are explained [here](https://dshizuka.github.io/networkanalysis/05_community.html) and [here](https://stackoverflow.com/questions/9471906/what-are-the-differences-between-community-detection-algorithms-in-igraph).
+
+Before using the `cluster_` functions, the networks have to be transformed into `igraph` objects.
+
+```{r}
+df_to_network <- function(network_df, weight_col){
+  network <- graph_from_data_frame(select(network_df,
+                                          from = Ind_A, to = Ind_B,
+                                          weight = matches(weight_col)),
+                              directed = FALSE)
+  return(network)
+}
+
+network_1 <- df_to_network(network_df, weight_col = "S1")
+network_2 <- df_to_network(network_df, weight_col = "S2")
+network_3 <- df_to_network(network_df, weight_col = "S3")
+network_4 <- df_to_network(network_df, weight_col = "S4")
+```
+
+Here's the standard output for such an object:
+```{r}
+network_1
+```
+
+And here's the output if one of the `cluster_` functions is applied to a network, in this example the _fast-greedy_ algorithm to the first network (S1):
+```{r}
+cluster_fast_greedy(network_1)
+```
+Thus, the function tries to detect clusters (called `groups`) and assigns each individual to such a group. Furthermore, it calculates modularity (`mod`).  
+
+The aim of this post is to use several of these functions and then compare 1) the number of detected groups and 2) the detected group membership of all individuals to what was simulated (_i.e._, the 'true' values). Furthermore, I will extract the global modularity, which can be used to compare the quality of different cluster methods (many of the algorithms try to maximize modularity when searching for clusters).  
+
+Therefore, I first define a function to apply the specified algorithm to a network, extract these metrics from the resulting `communities`-object, and return them in a dataframe.
+
+```{r}
+get_communities <- function(igraph_network, cluster_method = NULL){
+  if(is.null(cluster_method)) { stop("no method specificied") }
+  community_object <- do.call(cluster_method, list(igraph_network))
+  return(tibble(Ind = community_object$names,
+                Ind_Cluster = community_object$membership,
+                global_modularity = modularity(igraph_network,
+                                               community_object$membership,
+                                               weights = E(igraph_network)$weight),
+                method = cluster_method) %>% 
+           arrange(Ind))
+}
+```
+
+Example:
+```{r}
+get_communities(network_1, "cluster_fast_greedy")
+```
+Using this function, I apply several of the provided `igraph` methods with the four networks.
+```{r}
+networks <- grep("network_\\d", ls(), value = T)
+cluster_methods <- c("cluster_fast_greedy", "cluster_infomap",
+                     "cluster_label_prop", "cluster_optimal",
+                     "cluster_louvain", "cluster_walktrap")
+
+for(network_i in seq_along(networks)){
+  for(cluster_method_j in seq_along(cluster_methods)){
+    df_temp <- get_communities(igraph_network = get(networks[[network_i]]),
+                               cluster_method = cluster_methods[[cluster_method_j]])
+    df_temp$network <- networks[[network_i]]
+    if(network_i == 1 & cluster_method_j == 1) community_df <- df_temp
+    else community_df <- bind_rows(community_df, df_temp)
+  }
+}
+
+# Show structure of created dataframe
+str(community_df)
+```
+The resulting table includes the global modularity for each method and network, and the estimated group membership (`$Ind_Cluster`) of all individuals within each networks using each of the methods.
+
+### 2.4 Compare the detected clusters with simulated groups
+
+Finally, I compare the results of the different algorithms with the simulated networks.
+```{r}
+# Set up dataframe for loop
+cluster_summary <- tibble(
+  Cluster_method = rep(cluster_methods, each = length(networks)),
+  Scenario = rep(networks, times = length(cluster_methods)),
+  Dyads_n = length(unique(network_df$dyad)),
+  Groups_n = length(unique(network_df$Ind_A_Group)),
+  Clusters_n = NA,
+  Dyads_correct_n = NA,
+  Dyads_correct_prop = NA,
+  Modularity = NA)
+  
+# Use a loop to summarize for all methods and networks the 1) number of clusters
+# in comparison to simulated groups, and 2) the number of dyads correctly placed
+# together in a cluster.
+for(row_i in 1:nrow(cluster_summary)){
+  community_temp <- filter(community_df,
+                           method == cluster_summary[row_i,]$Cluster_method &
+                           network == cluster_summary[row_i,]$Scenario)
+  
+  cluster_summary_temp <- network_df %>%
+    select(Ind_A, Ind_B, Ind_A_Group, Ind_B_Group) %>%
+    left_join(select(community_temp, Ind_A = Ind, Ind_A_Cluster = Ind_Cluster),
+              by = "Ind_A") %>%
+    left_join(select(community_temp, Ind_B = Ind, Ind_B_Cluster = Ind_Cluster),
+              by = "Ind_B") %>%
+    mutate(same_group = (Ind_A_Group == Ind_B_Group),
+           same_cluster = (Ind_A_Cluster == Ind_B_Cluster))
+  
+    cluster_summary[row_i,]$Clusters_n = length(unique(community_temp$Ind_Cluster))
+    cluster_summary[row_i,]$Dyads_correct_n = sum(cluster_summary_temp$same_group == cluster_summary_temp$same_cluster)
+    cluster_summary[row_i,]$Modularity = unique(community_temp$global_modularity)
+}
+
+# Calculate variables comparing simulated with detected clusters and apply some
+# other cosmetic changes
+cluster_summary <- cluster_summary %>% 
+  mutate(Dyads_correct_prop = Dyads_correct_n/Dyads_n,
+         Clusters_vs_Groups = Clusters_n/Groups_n,
+         Scenario = str_replace(Scenario, "network_", "S"),
+         Cluster_method = str_remove(Cluster_method, "cluster_")) %>% 
+  mutate_if(is.numeric, ~round(., 2))
+```
+
+This is the resulting table:
+```{r}
+knitr::kable(cluster_summary)
+```
+
+Perhaps, it's a bit easier to interpret the results when graphically illustrated.
+
+### 2.5 Illustrate results
+
+```{r}
+create_plot <- function(df, y_var, y_title){
+  y_var <- sym(y_var)
+  ggplot(data = df,
+            aes(x = Scenario, y = !!y_var, group = Cluster_method, color = Cluster_method)) +
+  geom_line(size = 1.25, alpha = .6) +
+  geom_point(color = "black", size = 2, alpha = .5) +
+  ggrepel::geom_label_repel(data = filter(df, Scenario == "S4"),
+            aes(x = Scenario, y = !!y_var, color = Cluster_method, label = Cluster_method),
+            size = 4,
+            hjust = 0, nudge_x = .5, direction = "y",
+            label.padding = .1, point.padding = .5, segment.size = .25,
+            show.legend = F) +
+  scale_x_discrete(limits = c("S1", "S2", "S3", "S4", rep("", 4))) +
+  scale_y_continuous(name = y_title, limits = c(0, NA)) +
+  theme_minimal() +
+  theme(legend.position = "none")
+}
+
+cluster_plot <- create_plot(df = cluster_summary,
+                            y_var = "Clusters_vs_Groups",
+                            y_title = "Detected # Clusters / True # Groups")
+dyad_plot <- create_plot(df = cluster_summary,
+                         y_var = "Dyads_correct_prop",
+                         y_title = "Correct # Dyads / Total # Dyads")
+modularity_plot <- create_plot(df = cluster_summary,
+                               y_var = "Modularity",
+                               y_title = "Modularity")
+
+cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)
+```
+
+```{r, eval = FALSE, include = FALSE}
+cowplot::save_plot(filename =  "featured.png",
+                   plot = cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3),
+                   base_height = 4.5)
+```
+
+### 2.6 Conclusions
+
+For the created networks, here are my conclusions:
+
+1. None(!) of the tested algorithms correctly identified the number of groups in S1 and S2 (the two scenarios with 'close groups’). But three of the four algorithms that did best in these two scenarios (_louvain_, _walktrap_, _optimal_) perfectly identified groups in S3 and S4. Thus, under the circumstances simulated in S1 and S2, which are fairly common in reality I believe, one should be careful with the interpretation of the number of detected clusters.
+2. With the exception of S1, the _infomap_ algorithm did not very well and put all individuals in the same cluster. The _label_prob_ method was a bit better than _infomap_, but always failed to identify the correct number of groups.
+3. The comparison of modularity values confirms that the algorithms with the highest modularity values also were the best in identifying groups and individual group memberships (note that these modularity values are calculated without knowing the 'true' groups).
+4. As mentioned above and shown in the plot below, the simulation actually created many, fairly weak relationships among individuals, even among individuals from different groups. Perhaps, this makes the detection of clusters challenging for the algorithms, especially if the distinction between different groups within a larger community is variable (as in S1, S2). Thus, when applying such methods to identify clusters, it seems to be important to simulate some networks similar to the observed networks and try which methods are most appropriate given the circumstances.
+
+### 2.7 Identifying and illustrating clusters with `ggraph`
+
+The `ggraph` package also supports the use of the `igraph::cluster_` functions, which can be nicely used for a quick look at clusters. Here, both the detected clusters (using different colors) and the simulated groups (using different shapes) are shown. In contrast to the plots above, all relationships (or _edges_) are shown, including those < 0.3, which makes the networks look much denser than in the other plots.
+
+```{r}
+network_df %>% 
+  select(from = Ind_A, to = Ind_B, weight = S1) %>% 
+  as_tbl_graph(directed = FALSE) %>% 
+  activate(nodes) %>% 
+  left_join(distinct(individual_df, name = Ind, group = Group),
+            by = "name") %>%
+  mutate(detected_cluster = as.factor(group_louvain())) %>% 
+  ggraph(., layout = "fr") +
+  geom_edge_arc(aes(width = weight),
+                alpha = 0.3, strength = 0.1) +
+  scale_edge_width(name = "Association Index", range = c(0, 1.5)) +
+  geom_node_point(aes(fill = detected_cluster, shape = group),
+                  color = "black", size = 4) +
+  scale_fill_brewer(type = "qual", palette = 2) +
+  scale_shape_manual(values = c(21, 22, 23, 24)) +
+  theme_graph() +
+  guides(fill = guide_legend(override.aes = list(shape=21)))
+```
+
+It's clear from this plot that group_a and group_b are put in the same cluster by the _louvain_ method.

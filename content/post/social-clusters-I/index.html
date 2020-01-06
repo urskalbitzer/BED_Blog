@@ -7,8 +7,8 @@ categories: []
 tags:
   - R
   - Social Networks
-  - igraph
   - ggraph
+  - igraph
 subtitle: ''
 summary: ''
 authors: []
@@ -18,7 +18,7 @@ image:
   placement: 1
   caption: ''
   focal_point: 'Center'
-  preview_only: false
+  preview_only: no
 projects: []
 commentable: true
 ---
@@ -147,7 +147,7 @@ plot_beta &lt;- function(x, alpha_beta, main = &quot;&quot;, xlab = &quot;&quot;
             xlab = &quot;Association Index&quot;)
   
 }</code></pre>
-<p><img src="/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from the different distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and for all scenarios. For S1 and S2, group A and B are defined as the close groups.</p>
 <pre class="r"><code>get_weights &lt;- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
   # Create empty vector for all weights
@@ -209,7 +209,7 @@ clustered_network_plot &lt;- network_df %&gt;%
   theme_graph()
 
 clustered_network_plot</code></pre>
-<p><img src="/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+<p><img src="/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png" width="672" />
 As modeled above, S1 and S3 are very similar, except that group A and B are closer to each other in S1. S2 and S4 have both weaker within-group relationships compared to their counterparts S1 and S3, respectively. Thus, I have four different networks with different degrees of clustering, and in two of these networks, two of the four groups are closer to each other than to the other groups.</p>
 <p>In the next post, I will use different algorithms from the <code>igraph</code> package to check how well these clusters can be detected.</p>
 </div>

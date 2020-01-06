@@ -1,0 +1,543 @@
+---
+title: Creation and Detection of Clusters in Social Networks - Part 2
+author: Urs Kalbitzer
+date: '2020-01-05'
+slug: social-clusters-II
+categories: []
+tags:
+  - R
+  - Social Networks
+  - ggraph
+  - igraph
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-01-05T20:00:00-00:00'
+featured: no
+image:
+  placement: 1
+  caption: ''
+  focal_point: 'Center'
+  preview_only: no
+projects: []
+commentable: true
+---
+
+
+
+<p>In the <a href="/social-clusters-I/">previous post</a>, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the <code>igraph</code> package to test how well these simulated clusters can be (re)-detected.</p>
+<div id="determine-clustering-using-different-methods-and-compare-the-results" class="section level1">
+<h1>2. Determine clustering using different methods and compare the results</h1>
+<div id="prepare-r" class="section level3">
+<h3>2.1 Prepare R</h3>
+<pre class="r"><code>rm(list = ls())
+library(tidyverse)
+library(tidygraph)
+library(ggraph)
+library(igraph)</code></pre>
+<p>In addition to these packages, this notebook requires the installation of the following packages: <code>DT</code>, <code>cowplot</code>, <code>ggrepel</code>.</p>
+</div>
+<div id="recreate-the-network-from-previous-post" class="section level3">
+<h3>2.2 Recreate the network from previous post</h3>
+<p>To avoid repetition, the code is not shown here, but can be copied from the <a href="/social-clusters-I/">previous post</a>. The two objects that are required from there are <code>individual_df</code> and <code>network_df</code>.<br />
+The networks looked like that:</p>
+<p><img src="/post/social-clusters-II/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><strong><em>One important note</em>:</strong> My motivation for this small project was my research on a group of ~50 adult red colobus monkeys. Therefore, I simulated networks where most individuals were somehow connected. The plot above, however, only shows association indices <span class="math inline">\(\ge\)</span> 0.3 to make it easier to see the clusters. The complete network is much denser (see the final plot of this post). After finalizing the draft of this post, I realized that this may have affected how well (or not) the algorithms detected the (sub)-groups and therefore wanted to mention it here.</p>
+</div>
+<div id="use-different-algorithms-to-detect-clusters" class="section level3">
+<h3>2.3 Use different algorithms to detect clusters</h3>
+<p>The <code>igraph</code>-package provides several functions to detect communities within a network, which start with <code>cluster_</code> (type <code>?communities</code> in R for a complete list). Most of these algorithms are explained <a href="https://dshizuka.github.io/networkanalysis/05_community.html">here</a> and <a href="https://stackoverflow.com/questions/9471906/what-are-the-differences-between-community-detection-algorithms-in-igraph">here</a>.</p>
+<p>Before using the <code>cluster_</code> functions, the networks have to be transformed into <code>igraph</code> objects.</p>
+<pre class="r"><code>df_to_network &lt;- function(network_df, weight_col){
+  network &lt;- graph_from_data_frame(select(network_df,
+                                          from = Ind_A, to = Ind_B,
+                                          weight = matches(weight_col)),
+                              directed = FALSE)
+  return(network)
+}
+
+network_1 &lt;- df_to_network(network_df, weight_col = &quot;S1&quot;)
+network_2 &lt;- df_to_network(network_df, weight_col = &quot;S2&quot;)
+network_3 &lt;- df_to_network(network_df, weight_col = &quot;S3&quot;)
+network_4 &lt;- df_to_network(network_df, weight_col = &quot;S4&quot;)</code></pre>
+<p>Here’s the standard output for such an object:</p>
+<pre class="r"><code>network_1</code></pre>
+<pre><code>## IGRAPH 9f7d641 UNW- 50 1225 -- 
+## + attr: name (v/c), weight (e/n)
+## + edges from 9f7d641 (vertex names):
+##  [1] ind_01--ind_02 ind_01--ind_03 ind_01--ind_04 ind_01--ind_05 ind_01--ind_06
+##  [6] ind_01--ind_07 ind_01--ind_08 ind_01--ind_09 ind_01--ind_10 ind_01--ind_11
+## [11] ind_01--ind_12 ind_01--ind_13 ind_01--ind_14 ind_01--ind_15 ind_01--ind_16
+## [16] ind_01--ind_17 ind_01--ind_18 ind_01--ind_19 ind_01--ind_20 ind_01--ind_21
+## [21] ind_01--ind_22 ind_01--ind_23 ind_01--ind_24 ind_01--ind_25 ind_01--ind_26
+## [26] ind_01--ind_27 ind_01--ind_28 ind_01--ind_29 ind_01--ind_30 ind_01--ind_31
+## [31] ind_01--ind_32 ind_01--ind_33 ind_01--ind_34 ind_01--ind_35 ind_01--ind_36
+## [36] ind_01--ind_37 ind_01--ind_38 ind_01--ind_39 ind_01--ind_40 ind_01--ind_41
+## + ... omitted several edges</code></pre>
+<p>And here’s the output if one of the <code>cluster_</code> functions is applied to a network, in this example the <em>fast-greedy</em> algorithm to the first network (S1):</p>
+<pre class="r"><code>cluster_fast_greedy(network_1)</code></pre>
+<pre><code>## IGRAPH clustering fast greedy, groups: 3, mod: 0.32
+## + groups:
+##   $`1`
+##    [1] &quot;ind_05&quot; &quot;ind_09&quot; &quot;ind_12&quot; &quot;ind_17&quot; &quot;ind_20&quot; &quot;ind_23&quot; &quot;ind_26&quot; &quot;ind_29&quot;
+##    [9] &quot;ind_31&quot; &quot;ind_32&quot; &quot;ind_36&quot; &quot;ind_38&quot; &quot;ind_40&quot; &quot;ind_43&quot; &quot;ind_49&quot; &quot;ind_50&quot;
+##   
+##   $`2`
+##    [1] &quot;ind_03&quot; &quot;ind_15&quot; &quot;ind_19&quot; &quot;ind_21&quot; &quot;ind_22&quot; &quot;ind_27&quot; &quot;ind_28&quot; &quot;ind_37&quot;
+##    [9] &quot;ind_39&quot; &quot;ind_45&quot; &quot;ind_46&quot; &quot;ind_47&quot; &quot;ind_48&quot;
+##   
+##   $`3`
+##    [1] &quot;ind_01&quot; &quot;ind_02&quot; &quot;ind_04&quot; &quot;ind_06&quot; &quot;ind_07&quot; &quot;ind_08&quot; &quot;ind_10&quot; &quot;ind_11&quot;
+##   + ... omitted several groups/vertices</code></pre>
+<p>Thus, the function tries to detect clusters (called <code>groups</code>) and assigns each individual to such a group. Furthermore, it calculates modularity (<code>mod</code>).</p>
+<p>The aim of this post is to use several of these functions and then compare 1) the number of detected groups and 2) the detected group membership of all individuals to what was simulated (<em>i.e.</em>, the ‘true’ values). Furthermore, I will extract the global modularity, which can be used to compare the quality of different cluster methods (many of the algorithms try to maximize modularity when searching for clusters).</p>
+<p>Therefore, I first define a function to apply the specified algorithm to a network, extract these metrics from the resulting <code>communities</code>-object, and return them in a dataframe.</p>
+<pre class="r"><code>get_communities &lt;- function(igraph_network, cluster_method = NULL){
+  if(is.null(cluster_method)) { stop(&quot;no method specificied&quot;) }
+  community_object &lt;- do.call(cluster_method, list(igraph_network))
+  return(tibble(Ind = community_object$names,
+                Ind_Cluster = community_object$membership,
+                global_modularity = modularity(igraph_network,
+                                               community_object$membership,
+                                               weights = E(igraph_network)$weight),
+                method = cluster_method) %&gt;% 
+           arrange(Ind))
+}</code></pre>
+<p>Example:</p>
+<pre class="r"><code>get_communities(network_1, &quot;cluster_fast_greedy&quot;)</code></pre>
+<pre><code>## # A tibble: 50 x 4
+##    Ind    Ind_Cluster global_modularity method             
+##    &lt;chr&gt;        &lt;dbl&gt;             &lt;dbl&gt; &lt;chr&gt;              
+##  1 ind_01           3             0.318 cluster_fast_greedy
+##  2 ind_02           3             0.318 cluster_fast_greedy
+##  3 ind_03           2             0.318 cluster_fast_greedy
+##  4 ind_04           3             0.318 cluster_fast_greedy
+##  5 ind_05           1             0.318 cluster_fast_greedy
+##  6 ind_06           3             0.318 cluster_fast_greedy
+##  7 ind_07           3             0.318 cluster_fast_greedy
+##  8 ind_08           3             0.318 cluster_fast_greedy
+##  9 ind_09           1             0.318 cluster_fast_greedy
+## 10 ind_10           3             0.318 cluster_fast_greedy
+## # … with 40 more rows</code></pre>
+<p>Using this function, I apply several of the provided <code>igraph</code> methods with the four networks.</p>
+<pre class="r"><code>networks &lt;- grep(&quot;network_\\d&quot;, ls(), value = T)
+cluster_methods &lt;- c(&quot;cluster_fast_greedy&quot;, &quot;cluster_infomap&quot;,
+                     &quot;cluster_label_prop&quot;, &quot;cluster_optimal&quot;,
+                     &quot;cluster_louvain&quot;, &quot;cluster_walktrap&quot;)
+
+for(network_i in seq_along(networks)){
+  for(cluster_method_j in seq_along(cluster_methods)){
+    df_temp &lt;- get_communities(igraph_network = get(networks[[network_i]]),
+                               cluster_method = cluster_methods[[cluster_method_j]])
+    df_temp$network &lt;- networks[[network_i]]
+    if(network_i == 1 &amp; cluster_method_j == 1) community_df &lt;- df_temp
+    else community_df &lt;- bind_rows(community_df, df_temp)
+  }
+}
+
+# Show structure of created dataframe
+str(community_df)</code></pre>
+<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    1200 obs. of  5 variables:
+##  $ Ind              : chr  &quot;ind_01&quot; &quot;ind_02&quot; &quot;ind_03&quot; &quot;ind_04&quot; ...
+##  $ Ind_Cluster      : num  3 3 2 3 1 3 3 3 1 3 ...
+##  $ global_modularity: num  0.318 0.318 0.318 0.318 0.318 ...
+##  $ method           : chr  &quot;cluster_fast_greedy&quot; &quot;cluster_fast_greedy&quot; &quot;cluster_fast_greedy&quot; &quot;cluster_fast_greedy&quot; ...
+##  $ network          : chr  &quot;network_1&quot; &quot;network_1&quot; &quot;network_1&quot; &quot;network_1&quot; ...</code></pre>
+<p>The resulting table includes the global modularity for each method and network, and the estimated group membership (<code>$Ind_Cluster</code>) of all individuals within each networks using each of the methods.</p>
+</div>
+<div id="compare-the-detected-clusters-with-simulated-groups" class="section level3">
+<h3>2.4 Compare the detected clusters with simulated groups</h3>
+<p>Finally, I compare the results of the different algorithms with the simulated networks.</p>
+<pre class="r"><code># Set up dataframe for loop
+cluster_summary &lt;- tibble(
+  Cluster_method = rep(cluster_methods, each = length(networks)),
+  Scenario = rep(networks, times = length(cluster_methods)),
+  Dyads_n = length(unique(network_df$dyad)),
+  Groups_n = length(unique(network_df$Ind_A_Group)),
+  Clusters_n = NA,
+  Dyads_correct_n = NA,
+  Dyads_correct_prop = NA,
+  Modularity = NA)
+  
+# Use a loop to summarize for all methods and networks the 1) number of clusters
+# in comparison to simulated groups, and 2) the number of dyads correctly placed
+# together in a cluster.
+for(row_i in 1:nrow(cluster_summary)){
+  community_temp &lt;- filter(community_df,
+                           method == cluster_summary[row_i,]$Cluster_method &amp;
+                           network == cluster_summary[row_i,]$Scenario)
+  
+  cluster_summary_temp &lt;- network_df %&gt;%
+    select(Ind_A, Ind_B, Ind_A_Group, Ind_B_Group) %&gt;%
+    left_join(select(community_temp, Ind_A = Ind, Ind_A_Cluster = Ind_Cluster),
+              by = &quot;Ind_A&quot;) %&gt;%
+    left_join(select(community_temp, Ind_B = Ind, Ind_B_Cluster = Ind_Cluster),
+              by = &quot;Ind_B&quot;) %&gt;%
+    mutate(same_group = (Ind_A_Group == Ind_B_Group),
+           same_cluster = (Ind_A_Cluster == Ind_B_Cluster))
+  
+    cluster_summary[row_i,]$Clusters_n = length(unique(community_temp$Ind_Cluster))
+    cluster_summary[row_i,]$Dyads_correct_n = sum(cluster_summary_temp$same_group == cluster_summary_temp$same_cluster)
+    cluster_summary[row_i,]$Modularity = unique(community_temp$global_modularity)
+}
+
+# Calculate variables comparing simulated with detected clusters and apply some
+# other cosmetic changes
+cluster_summary &lt;- cluster_summary %&gt;% 
+  mutate(Dyads_correct_prop = Dyads_correct_n/Dyads_n,
+         Clusters_vs_Groups = Clusters_n/Groups_n,
+         Scenario = str_replace(Scenario, &quot;network_&quot;, &quot;S&quot;),
+         Cluster_method = str_remove(Cluster_method, &quot;cluster_&quot;)) %&gt;% 
+  mutate_if(is.numeric, ~round(., 2))</code></pre>
+<p>This is the resulting table:</p>
+<pre class="r"><code>knitr::kable(cluster_summary)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Cluster_method</th>
+<th align="left">Scenario</th>
+<th align="right">Dyads_n</th>
+<th align="right">Groups_n</th>
+<th align="right">Clusters_n</th>
+<th align="right">Dyads_correct_n</th>
+<th align="right">Dyads_correct_prop</th>
+<th align="right">Modularity</th>
+<th align="right">Clusters_vs_Groups</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">fast_greedy</td>
+<td align="left">S1</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.32</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="even">
+<td align="left">fast_greedy</td>
+<td align="left">S2</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.22</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="odd">
+<td align="left">fast_greedy</td>
+<td align="left">S3</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">1225</td>
+<td align="right">1.00</td>
+<td align="right">0.31</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="even">
+<td align="left">fast_greedy</td>
+<td align="left">S4</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.22</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="odd">
+<td align="left">infomap</td>
+<td align="left">S1</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.32</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="even">
+<td align="left">infomap</td>
+<td align="left">S2</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">304</td>
+<td align="right">0.25</td>
+<td align="right">0.00</td>
+<td align="right">0.25</td>
+</tr>
+<tr class="odd">
+<td align="left">infomap</td>
+<td align="left">S3</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">304</td>
+<td align="right">0.25</td>
+<td align="right">0.00</td>
+<td align="right">0.25</td>
+</tr>
+<tr class="even">
+<td align="left">infomap</td>
+<td align="left">S4</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">304</td>
+<td align="right">0.25</td>
+<td align="right">0.00</td>
+<td align="right">0.25</td>
+</tr>
+<tr class="odd">
+<td align="left">label_prop</td>
+<td align="left">S1</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">848</td>
+<td align="right">0.69</td>
+<td align="right">0.23</td>
+<td align="right">0.50</td>
+</tr>
+<tr class="even">
+<td align="left">label_prop</td>
+<td align="left">S2</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">304</td>
+<td align="right">0.25</td>
+<td align="right">0.00</td>
+<td align="right">0.25</td>
+</tr>
+<tr class="odd">
+<td align="left">label_prop</td>
+<td align="left">S3</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.29</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="even">
+<td align="left">label_prop</td>
+<td align="left">S4</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">848</td>
+<td align="right">0.69</td>
+<td align="right">0.17</td>
+<td align="right">0.50</td>
+</tr>
+<tr class="odd">
+<td align="left">optimal</td>
+<td align="left">S1</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.32</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="even">
+<td align="left">optimal</td>
+<td align="left">S2</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.22</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="odd">
+<td align="left">optimal</td>
+<td align="left">S3</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">1225</td>
+<td align="right">1.00</td>
+<td align="right">0.31</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="even">
+<td align="left">optimal</td>
+<td align="left">S4</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">1225</td>
+<td align="right">1.00</td>
+<td align="right">0.23</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="odd">
+<td align="left">louvain</td>
+<td align="left">S1</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.32</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="even">
+<td align="left">louvain</td>
+<td align="left">S2</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.22</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="odd">
+<td align="left">louvain</td>
+<td align="left">S3</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">1225</td>
+<td align="right">1.00</td>
+<td align="right">0.31</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="even">
+<td align="left">louvain</td>
+<td align="left">S4</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">1225</td>
+<td align="right">1.00</td>
+<td align="right">0.23</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="odd">
+<td align="left">walktrap</td>
+<td align="left">S1</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.32</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="even">
+<td align="left">walktrap</td>
+<td align="left">S2</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1121</td>
+<td align="right">0.92</td>
+<td align="right">0.22</td>
+<td align="right">0.75</td>
+</tr>
+<tr class="odd">
+<td align="left">walktrap</td>
+<td align="left">S3</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">1225</td>
+<td align="right">1.00</td>
+<td align="right">0.31</td>
+<td align="right">1.00</td>
+</tr>
+<tr class="even">
+<td align="left">walktrap</td>
+<td align="left">S4</td>
+<td align="right">1225</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">1225</td>
+<td align="right">1.00</td>
+<td align="right">0.23</td>
+<td align="right">1.00</td>
+</tr>
+</tbody>
+</table>
+<p>Perhaps, it’s a bit easier to interpret the results when graphically illustrated.</p>
+</div>
+<div id="illustrate-results" class="section level3">
+<h3>2.5 Illustrate results</h3>
+<pre class="r"><code>create_plot &lt;- function(df, y_var, y_title){
+  y_var &lt;- sym(y_var)
+  ggplot(data = df,
+            aes(x = Scenario, y = !!y_var, group = Cluster_method, color = Cluster_method)) +
+  geom_line(size = 1.25, alpha = .6) +
+  geom_point(color = &quot;black&quot;, size = 2, alpha = .5) +
+  ggrepel::geom_label_repel(data = filter(df, Scenario == &quot;S4&quot;),
+            aes(x = Scenario, y = !!y_var, color = Cluster_method, label = Cluster_method),
+            size = 4,
+            hjust = 0, nudge_x = .5, direction = &quot;y&quot;,
+            label.padding = .1, point.padding = .5, segment.size = .25,
+            show.legend = F) +
+  scale_x_discrete(limits = c(&quot;S1&quot;, &quot;S2&quot;, &quot;S3&quot;, &quot;S4&quot;, rep(&quot;&quot;, 4))) +
+  scale_y_continuous(name = y_title, limits = c(0, NA)) +
+  theme_minimal() +
+  theme(legend.position = &quot;none&quot;)
+}
+
+cluster_plot &lt;- create_plot(df = cluster_summary,
+                            y_var = &quot;Clusters_vs_Groups&quot;,
+                            y_title = &quot;Detected # Clusters / True # Groups&quot;)
+dyad_plot &lt;- create_plot(df = cluster_summary,
+                         y_var = &quot;Dyads_correct_prop&quot;,
+                         y_title = &quot;Correct # Dyads / Total # Dyads&quot;)
+modularity_plot &lt;- create_plot(df = cluster_summary,
+                               y_var = &quot;Modularity&quot;,
+                               y_title = &quot;Modularity&quot;)
+
+cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)</code></pre>
+<p><img src="/post/social-clusters-II/index_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+</div>
+<div id="conclusions" class="section level3">
+<h3>2.6 Conclusions</h3>
+<p>For the created networks, here are my conclusions:</p>
+<ol style="list-style-type: decimal">
+<li>None(!) of the tested algorithms correctly identified the number of groups in S1 and S2 (the two scenarios with ‘close groups’). But three of the four algorithms that did best in these two scenarios (<em>louvain</em>, <em>walktrap</em>, <em>optimal</em>) perfectly identified groups in S3 and S4. Thus, under the circumstances simulated in S1 and S2, which are fairly common in reality I believe, one should be careful with the interpretation of the number of detected clusters.</li>
+<li>With the exception of S1, the <em>infomap</em> algorithm did not very well and put all individuals in the same cluster. The <em>label_prob</em> method was a bit better than <em>infomap</em>, but always failed to identify the correct number of groups.</li>
+<li>The comparison of modularity values confirms that the algorithms with the highest modularity values also were the best in identifying groups and individual group memberships (note that these modularity values are calculated without knowing the ‘true’ groups).</li>
+<li>As mentioned above and shown in the plot below, the simulation actually created many, fairly weak relationships among individuals, even among individuals from different groups. Perhaps, this makes the detection of clusters challenging for the algorithms, especially if the distinction between different groups within a larger community is variable (as in S1, S2). Thus, when applying such methods to identify clusters, it seems to be important to simulate some networks similar to the observed networks and try which methods are most appropriate given the circumstances.</li>
+</ol>
+</div>
+<div id="identifying-and-illustrating-clusters-with-ggraph" class="section level3">
+<h3>2.7 Identifying and illustrating clusters with <code>ggraph</code></h3>
+<p>The <code>ggraph</code> package also supports the use of the <code>igraph::cluster_</code> functions, which can be nicely used for a quick look at clusters. Here, both the detected clusters (using different colors) and the simulated groups (using different shapes) are shown. In contrast to the plots above, all relationships (or <em>edges</em>) are shown, including those &lt; 0.3, which makes the networks look much denser than in the other plots.</p>
+<pre class="r"><code>network_df %&gt;% 
+  select(from = Ind_A, to = Ind_B, weight = S1) %&gt;% 
+  as_tbl_graph(directed = FALSE) %&gt;% 
+  activate(nodes) %&gt;% 
+  left_join(distinct(individual_df, name = Ind, group = Group),
+            by = &quot;name&quot;) %&gt;%
+  mutate(detected_cluster = as.factor(group_louvain())) %&gt;% 
+  ggraph(., layout = &quot;fr&quot;) +
+  geom_edge_arc(aes(width = weight),
+                alpha = 0.3, strength = 0.1) +
+  scale_edge_width(name = &quot;Association Index&quot;, range = c(0, 1.5)) +
+  geom_node_point(aes(fill = detected_cluster, shape = group),
+                  color = &quot;black&quot;, size = 4) +
+  scale_fill_brewer(type = &quot;qual&quot;, palette = 2) +
+  scale_shape_manual(values = c(21, 22, 23, 24)) +
+  theme_graph() +
+  guides(fill = guide_legend(override.aes = list(shape=21)))</code></pre>
+<p><img src="/post/social-clusters-II/index_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>It’s clear from this plot that group_a and group_b are put in the same cluster by the <em>louvain</em> method.</p>
+</div>
+</div>

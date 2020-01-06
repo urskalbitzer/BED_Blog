@@ -44,6 +44,9 @@
 
   
   
+  
+  <script src="/js/mathjax-config.js"></script>
+  
 
   
   
@@ -167,9 +170,9 @@
 
       
       
-        
-      
 
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" integrity="" crossorigin="anonymous" async></script>
       
     
       
@@ -228,7 +231,7 @@
   <meta property="og:description" content=""><meta property="og:image" content="/img/icon-192.png">
   <meta property="twitter:image" content="/img/icon-192.png"><meta property="og:locale" content="en-us">
   
-    <meta property="og:updated_time" content="2019-12-31T00:00:00&#43;00:00">
+    <meta property="og:updated_time" content="2020-01-05T00:00:00&#43;00:00">
   
 
   
@@ -436,7 +439,17 @@
   
   
   <div>
-    <h2><a href="/post/social-clusters-i/">Creation and Detection of Clusters in Social Networks - Part 1</a></h2>
+    <h2><a href="/content/post/social-clusters-ii/">Creation and Detection of Clusters in Social Networks - Part 2</a></h2>
+    <div class="article-style">
+      
+      In the previous post, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the igraph package to test how well these simulated clusters can be (re)-detected.
+2. Determine clustering using different methods and compare the results 2.1 Prepare R rm(list = ls()) library(tidyverse) library(tidygraph) library(ggraph) library(igraph) In addition to these packages, this notebook requires the installation of the following packages: DT, cowplot, ggrepel.
+      
+    </div>
+  </div>
+  
+  <div>
+    <h2><a href="/content/post/social-clusters-i/">Creation and Detection of Clusters in Social Networks - Part 1</a></h2>
     <div class="article-style">
       
       Social networks often exhibit some kind of clustering (or community structure), such as distinct social groups in animal societies, or kin groups (or families) within social groups. Individuals within such clusters are more likely to interact with each other than individuals from different clusters.

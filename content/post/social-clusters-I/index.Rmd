@@ -7,8 +7,8 @@ categories: []
 tags:
   - R
   - Social Networks
-  - igraph
   - ggraph
+  - igraph
 subtitle: ''
 summary: ''
 authors: []
@@ -18,7 +18,7 @@ image:
   placement: 1
   caption: ''
   focal_point: 'Center'
-  preview_only: false
+  preview_only: no
 projects: []
 commentable: true
 ---

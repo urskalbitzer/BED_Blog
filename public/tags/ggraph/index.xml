@@ -5,7 +5,7 @@
     <link>/tags/ggraph/</link>
       <atom:link href="/tags/ggraph/index.xml" rel="self" type="application/rss+xml" />
     <description>ggraph</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Tue, 31 Dec 2019 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Sun, 05 Jan 2020 00:00:00 +0000</lastBuildDate>
     <image>
       <url>/img/icon-192.png</url>
       <title>ggraph</title>
@@ -13,10 +13,537 @@
     </image>
     
     <item>
+      <title>Creation and Detection of Clusters in Social Networks - Part 2</title>
+      <link>/content/post/social-clusters-ii/</link>
+      <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/content/post/social-clusters-ii/</guid>
+      <description>
+
+
+&lt;p&gt;In the &lt;a href=&#34;/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the &lt;code&gt;igraph&lt;/code&gt; package to test how well these simulated clusters can be (re)-detected.&lt;/p&gt;
+&lt;div id=&#34;determine-clustering-using-different-methods-and-compare-the-results&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;2. Determine clustering using different methods and compare the results&lt;/h1&gt;
+&lt;div id=&#34;prepare-r&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;2.1 Prepare R&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rm(list = ls())
+library(tidyverse)
+library(tidygraph)
+library(ggraph)
+library(igraph)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In addition to these packages, this notebook requires the installation of the following packages: &lt;code&gt;DT&lt;/code&gt;, &lt;code&gt;cowplot&lt;/code&gt;, &lt;code&gt;ggrepel&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;recreate-the-network-from-previous-post&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;2.2 Recreate the network from previous post&lt;/h3&gt;
+&lt;p&gt;To avoid repetition, the code is not shown here, but can be copied from the &lt;a href=&#34;/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;. The two objects that are required from there are &lt;code&gt;individual_df&lt;/code&gt; and &lt;code&gt;network_df&lt;/code&gt;.&lt;br /&gt;
+The networks looked like that:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;One important note&lt;/em&gt;:&lt;/strong&gt; My motivation for this small project was my research on a group of ~50 adult red colobus monkeys. Therefore, I simulated networks where most individuals were somehow connected. The plot above, however, only shows association indices &lt;span class=&#34;math inline&#34;&gt;\(\ge\)&lt;/span&gt; 0.3 to make it easier to see the clusters. The complete network is much denser (see the final plot of this post). After finalizing the draft of this post, I realized that this may have affected how well (or not) the algorithms detected the (sub)-groups and therefore wanted to mention it here.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;use-different-algorithms-to-detect-clusters&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;2.3 Use different algorithms to detect clusters&lt;/h3&gt;
+&lt;p&gt;The &lt;code&gt;igraph&lt;/code&gt;-package provides several functions to detect communities within a network, which start with &lt;code&gt;cluster_&lt;/code&gt; (type &lt;code&gt;?communities&lt;/code&gt; in R for a complete list). Most of these algorithms are explained &lt;a href=&#34;https://dshizuka.github.io/networkanalysis/05_community.html&#34;&gt;here&lt;/a&gt; and &lt;a href=&#34;https://stackoverflow.com/questions/9471906/what-are-the-differences-between-community-detection-algorithms-in-igraph&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Before using the &lt;code&gt;cluster_&lt;/code&gt; functions, the networks have to be transformed into &lt;code&gt;igraph&lt;/code&gt; objects.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df_to_network &amp;lt;- function(network_df, weight_col){
+  network &amp;lt;- graph_from_data_frame(select(network_df,
+                                          from = Ind_A, to = Ind_B,
+                                          weight = matches(weight_col)),
+                              directed = FALSE)
+  return(network)
+}
+
+network_1 &amp;lt;- df_to_network(network_df, weight_col = &amp;quot;S1&amp;quot;)
+network_2 &amp;lt;- df_to_network(network_df, weight_col = &amp;quot;S2&amp;quot;)
+network_3 &amp;lt;- df_to_network(network_df, weight_col = &amp;quot;S3&amp;quot;)
+network_4 &amp;lt;- df_to_network(network_df, weight_col = &amp;quot;S4&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here’s the standard output for such an object:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;network_1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## IGRAPH 9f7d641 UNW- 50 1225 -- 
+## + attr: name (v/c), weight (e/n)
+## + edges from 9f7d641 (vertex names):
+##  [1] ind_01--ind_02 ind_01--ind_03 ind_01--ind_04 ind_01--ind_05 ind_01--ind_06
+##  [6] ind_01--ind_07 ind_01--ind_08 ind_01--ind_09 ind_01--ind_10 ind_01--ind_11
+## [11] ind_01--ind_12 ind_01--ind_13 ind_01--ind_14 ind_01--ind_15 ind_01--ind_16
+## [16] ind_01--ind_17 ind_01--ind_18 ind_01--ind_19 ind_01--ind_20 ind_01--ind_21
+## [21] ind_01--ind_22 ind_01--ind_23 ind_01--ind_24 ind_01--ind_25 ind_01--ind_26
+## [26] ind_01--ind_27 ind_01--ind_28 ind_01--ind_29 ind_01--ind_30 ind_01--ind_31
+## [31] ind_01--ind_32 ind_01--ind_33 ind_01--ind_34 ind_01--ind_35 ind_01--ind_36
+## [36] ind_01--ind_37 ind_01--ind_38 ind_01--ind_39 ind_01--ind_40 ind_01--ind_41
+## + ... omitted several edges&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And here’s the output if one of the &lt;code&gt;cluster_&lt;/code&gt; functions is applied to a network, in this example the &lt;em&gt;fast-greedy&lt;/em&gt; algorithm to the first network (S1):&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cluster_fast_greedy(network_1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## IGRAPH clustering fast greedy, groups: 3, mod: 0.32
+## + groups:
+##   $`1`
+##    [1] &amp;quot;ind_05&amp;quot; &amp;quot;ind_09&amp;quot; &amp;quot;ind_12&amp;quot; &amp;quot;ind_17&amp;quot; &amp;quot;ind_20&amp;quot; &amp;quot;ind_23&amp;quot; &amp;quot;ind_26&amp;quot; &amp;quot;ind_29&amp;quot;
+##    [9] &amp;quot;ind_31&amp;quot; &amp;quot;ind_32&amp;quot; &amp;quot;ind_36&amp;quot; &amp;quot;ind_38&amp;quot; &amp;quot;ind_40&amp;quot; &amp;quot;ind_43&amp;quot; &amp;quot;ind_49&amp;quot; &amp;quot;ind_50&amp;quot;
+##   
+##   $`2`
+##    [1] &amp;quot;ind_03&amp;quot; &amp;quot;ind_15&amp;quot; &amp;quot;ind_19&amp;quot; &amp;quot;ind_21&amp;quot; &amp;quot;ind_22&amp;quot; &amp;quot;ind_27&amp;quot; &amp;quot;ind_28&amp;quot; &amp;quot;ind_37&amp;quot;
+##    [9] &amp;quot;ind_39&amp;quot; &amp;quot;ind_45&amp;quot; &amp;quot;ind_46&amp;quot; &amp;quot;ind_47&amp;quot; &amp;quot;ind_48&amp;quot;
+##   
+##   $`3`
+##    [1] &amp;quot;ind_01&amp;quot; &amp;quot;ind_02&amp;quot; &amp;quot;ind_04&amp;quot; &amp;quot;ind_06&amp;quot; &amp;quot;ind_07&amp;quot; &amp;quot;ind_08&amp;quot; &amp;quot;ind_10&amp;quot; &amp;quot;ind_11&amp;quot;
+##   + ... omitted several groups/vertices&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Thus, the function tries to detect clusters (called &lt;code&gt;groups&lt;/code&gt;) and assigns each individual to such a group. Furthermore, it calculates modularity (&lt;code&gt;mod&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;The aim of this post is to use several of these functions and then compare 1) the number of detected groups and 2) the detected group membership of all individuals to what was simulated (&lt;em&gt;i.e.&lt;/em&gt;, the ‘true’ values). Furthermore, I will extract the global modularity, which can be used to compare the quality of different cluster methods (many of the algorithms try to maximize modularity when searching for clusters).&lt;/p&gt;
+&lt;p&gt;Therefore, I first define a function to apply the specified algorithm to a network, extract these metrics from the resulting &lt;code&gt;communities&lt;/code&gt;-object, and return them in a dataframe.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_communities &amp;lt;- function(igraph_network, cluster_method = NULL){
+  if(is.null(cluster_method)) { stop(&amp;quot;no method specificied&amp;quot;) }
+  community_object &amp;lt;- do.call(cluster_method, list(igraph_network))
+  return(tibble(Ind = community_object$names,
+                Ind_Cluster = community_object$membership,
+                global_modularity = modularity(igraph_network,
+                                               community_object$membership,
+                                               weights = E(igraph_network)$weight),
+                method = cluster_method) %&amp;gt;% 
+           arrange(Ind))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_communities(network_1, &amp;quot;cluster_fast_greedy&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 50 x 4
+##    Ind    Ind_Cluster global_modularity method             
+##    &amp;lt;chr&amp;gt;        &amp;lt;dbl&amp;gt;             &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt;              
+##  1 ind_01           3             0.318 cluster_fast_greedy
+##  2 ind_02           3             0.318 cluster_fast_greedy
+##  3 ind_03           2             0.318 cluster_fast_greedy
+##  4 ind_04           3             0.318 cluster_fast_greedy
+##  5 ind_05           1             0.318 cluster_fast_greedy
+##  6 ind_06           3             0.318 cluster_fast_greedy
+##  7 ind_07           3             0.318 cluster_fast_greedy
+##  8 ind_08           3             0.318 cluster_fast_greedy
+##  9 ind_09           1             0.318 cluster_fast_greedy
+## 10 ind_10           3             0.318 cluster_fast_greedy
+## # … with 40 more rows&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Using this function, I apply several of the provided &lt;code&gt;igraph&lt;/code&gt; methods with the four networks.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;networks &amp;lt;- grep(&amp;quot;network_\\d&amp;quot;, ls(), value = T)
+cluster_methods &amp;lt;- c(&amp;quot;cluster_fast_greedy&amp;quot;, &amp;quot;cluster_infomap&amp;quot;,
+                     &amp;quot;cluster_label_prop&amp;quot;, &amp;quot;cluster_optimal&amp;quot;,
+                     &amp;quot;cluster_louvain&amp;quot;, &amp;quot;cluster_walktrap&amp;quot;)
+
+for(network_i in seq_along(networks)){
+  for(cluster_method_j in seq_along(cluster_methods)){
+    df_temp &amp;lt;- get_communities(igraph_network = get(networks[[network_i]]),
+                               cluster_method = cluster_methods[[cluster_method_j]])
+    df_temp$network &amp;lt;- networks[[network_i]]
+    if(network_i == 1 &amp;amp; cluster_method_j == 1) community_df &amp;lt;- df_temp
+    else community_df &amp;lt;- bind_rows(community_df, df_temp)
+  }
+}
+
+# Show structure of created dataframe
+str(community_df)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Classes &amp;#39;tbl_df&amp;#39;, &amp;#39;tbl&amp;#39; and &amp;#39;data.frame&amp;#39;:    1200 obs. of  5 variables:
+##  $ Ind              : chr  &amp;quot;ind_01&amp;quot; &amp;quot;ind_02&amp;quot; &amp;quot;ind_03&amp;quot; &amp;quot;ind_04&amp;quot; ...
+##  $ Ind_Cluster      : num  3 3 2 3 1 3 3 3 1 3 ...
+##  $ global_modularity: num  0.318 0.318 0.318 0.318 0.318 ...
+##  $ method           : chr  &amp;quot;cluster_fast_greedy&amp;quot; &amp;quot;cluster_fast_greedy&amp;quot; &amp;quot;cluster_fast_greedy&amp;quot; &amp;quot;cluster_fast_greedy&amp;quot; ...
+##  $ network          : chr  &amp;quot;network_1&amp;quot; &amp;quot;network_1&amp;quot; &amp;quot;network_1&amp;quot; &amp;quot;network_1&amp;quot; ...&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The resulting table includes the global modularity for each method and network, and the estimated group membership (&lt;code&gt;$Ind_Cluster&lt;/code&gt;) of all individuals within each networks using each of the methods.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;compare-the-detected-clusters-with-simulated-groups&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;2.4 Compare the detected clusters with simulated groups&lt;/h3&gt;
+&lt;p&gt;Finally, I compare the results of the different algorithms with the simulated networks.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Set up dataframe for loop
+cluster_summary &amp;lt;- tibble(
+  Cluster_method = rep(cluster_methods, each = length(networks)),
+  Scenario = rep(networks, times = length(cluster_methods)),
+  Dyads_n = length(unique(network_df$dyad)),
+  Groups_n = length(unique(network_df$Ind_A_Group)),
+  Clusters_n = NA,
+  Dyads_correct_n = NA,
+  Dyads_correct_prop = NA,
+  Modularity = NA)
+  
+# Use a loop to summarize for all methods and networks the 1) number of clusters
+# in comparison to simulated groups, and 2) the number of dyads correctly placed
+# together in a cluster.
+for(row_i in 1:nrow(cluster_summary)){
+  community_temp &amp;lt;- filter(community_df,
+                           method == cluster_summary[row_i,]$Cluster_method &amp;amp;
+                           network == cluster_summary[row_i,]$Scenario)
+  
+  cluster_summary_temp &amp;lt;- network_df %&amp;gt;%
+    select(Ind_A, Ind_B, Ind_A_Group, Ind_B_Group) %&amp;gt;%
+    left_join(select(community_temp, Ind_A = Ind, Ind_A_Cluster = Ind_Cluster),
+              by = &amp;quot;Ind_A&amp;quot;) %&amp;gt;%
+    left_join(select(community_temp, Ind_B = Ind, Ind_B_Cluster = Ind_Cluster),
+              by = &amp;quot;Ind_B&amp;quot;) %&amp;gt;%
+    mutate(same_group = (Ind_A_Group == Ind_B_Group),
+           same_cluster = (Ind_A_Cluster == Ind_B_Cluster))
+  
+    cluster_summary[row_i,]$Clusters_n = length(unique(community_temp$Ind_Cluster))
+    cluster_summary[row_i,]$Dyads_correct_n = sum(cluster_summary_temp$same_group == cluster_summary_temp$same_cluster)
+    cluster_summary[row_i,]$Modularity = unique(community_temp$global_modularity)
+}
+
+# Calculate variables comparing simulated with detected clusters and apply some
+# other cosmetic changes
+cluster_summary &amp;lt;- cluster_summary %&amp;gt;% 
+  mutate(Dyads_correct_prop = Dyads_correct_n/Dyads_n,
+         Clusters_vs_Groups = Clusters_n/Groups_n,
+         Scenario = str_replace(Scenario, &amp;quot;network_&amp;quot;, &amp;quot;S&amp;quot;),
+         Cluster_method = str_remove(Cluster_method, &amp;quot;cluster_&amp;quot;)) %&amp;gt;% 
+  mutate_if(is.numeric, ~round(., 2))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This is the resulting table:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;knitr::kable(cluster_summary)&lt;/code&gt;&lt;/pre&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr class=&#34;header&#34;&gt;
+&lt;th align=&#34;left&#34;&gt;Cluster_method&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Scenario&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Dyads_n&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Groups_n&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Clusters_n&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Dyads_correct_n&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Dyads_correct_prop&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Modularity&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Clusters_vs_Groups&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;fast_greedy&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.32&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;fast_greedy&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.22&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;fast_greedy&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.31&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;fast_greedy&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.22&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;infomap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.32&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;infomap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;304&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.25&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.25&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;infomap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;304&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.25&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.25&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;infomap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;304&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.25&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.25&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;label_prop&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;848&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.69&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.23&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.50&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;label_prop&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;304&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.25&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.25&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;label_prop&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.29&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;label_prop&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;848&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.69&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.17&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.50&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;optimal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.32&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;optimal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.22&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;optimal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.31&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;optimal&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.23&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;louvain&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.32&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;louvain&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.22&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;louvain&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.31&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;louvain&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.23&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;walktrap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.32&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;walktrap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1121&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.92&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.22&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.75&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;odd&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;walktrap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S3&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.31&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr class=&#34;even&#34;&gt;
+&lt;td align=&#34;left&#34;&gt;walktrap&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;S4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1225&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.23&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1.00&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Perhaps, it’s a bit easier to interpret the results when graphically illustrated.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;illustrate-results&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;2.5 Illustrate results&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;create_plot &amp;lt;- function(df, y_var, y_title){
+  y_var &amp;lt;- sym(y_var)
+  ggplot(data = df,
+            aes(x = Scenario, y = !!y_var, group = Cluster_method, color = Cluster_method)) +
+  geom_line(size = 1.25, alpha = .6) +
+  geom_point(color = &amp;quot;black&amp;quot;, size = 2, alpha = .5) +
+  ggrepel::geom_label_repel(data = filter(df, Scenario == &amp;quot;S4&amp;quot;),
+            aes(x = Scenario, y = !!y_var, color = Cluster_method, label = Cluster_method),
+            size = 4,
+            hjust = 0, nudge_x = .5, direction = &amp;quot;y&amp;quot;,
+            label.padding = .1, point.padding = .5, segment.size = .25,
+            show.legend = F) +
+  scale_x_discrete(limits = c(&amp;quot;S1&amp;quot;, &amp;quot;S2&amp;quot;, &amp;quot;S3&amp;quot;, &amp;quot;S4&amp;quot;, rep(&amp;quot;&amp;quot;, 4))) +
+  scale_y_continuous(name = y_title, limits = c(0, NA)) +
+  theme_minimal() +
+  theme(legend.position = &amp;quot;none&amp;quot;)
+}
+
+cluster_plot &amp;lt;- create_plot(df = cluster_summary,
+                            y_var = &amp;quot;Clusters_vs_Groups&amp;quot;,
+                            y_title = &amp;quot;Detected # Clusters / True # Groups&amp;quot;)
+dyad_plot &amp;lt;- create_plot(df = cluster_summary,
+                         y_var = &amp;quot;Dyads_correct_prop&amp;quot;,
+                         y_title = &amp;quot;Correct # Dyads / Total # Dyads&amp;quot;)
+modularity_plot &amp;lt;- create_plot(df = cluster_summary,
+                               y_var = &amp;quot;Modularity&amp;quot;,
+                               y_title = &amp;quot;Modularity&amp;quot;)
+
+cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusions&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;2.6 Conclusions&lt;/h3&gt;
+&lt;p&gt;For the created networks, here are my conclusions:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;None(!) of the tested algorithms correctly identified the number of groups in S1 and S2 (the two scenarios with ‘close groups’). But three of the four algorithms that did best in these two scenarios (&lt;em&gt;louvain&lt;/em&gt;, &lt;em&gt;walktrap&lt;/em&gt;, &lt;em&gt;optimal&lt;/em&gt;) perfectly identified groups in S3 and S4. Thus, under the circumstances simulated in S1 and S2, which are fairly common in reality I believe, one should be careful with the interpretation of the number of detected clusters.&lt;/li&gt;
+&lt;li&gt;With the exception of S1, the &lt;em&gt;infomap&lt;/em&gt; algorithm did not very well and put all individuals in the same cluster. The &lt;em&gt;label_prob&lt;/em&gt; method was a bit better than &lt;em&gt;infomap&lt;/em&gt;, but always failed to identify the correct number of groups.&lt;/li&gt;
+&lt;li&gt;The comparison of modularity values confirms that the algorithms with the highest modularity values also were the best in identifying groups and individual group memberships (note that these modularity values are calculated without knowing the ‘true’ groups).&lt;/li&gt;
+&lt;li&gt;As mentioned above and shown in the plot below, the simulation actually created many, fairly weak relationships among individuals, even among individuals from different groups. Perhaps, this makes the detection of clusters challenging for the algorithms, especially if the distinction between different groups within a larger community is variable (as in S1, S2). Thus, when applying such methods to identify clusters, it seems to be important to simulate some networks similar to the observed networks and try which methods are most appropriate given the circumstances.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;identifying-and-illustrating-clusters-with-ggraph&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;2.7 Identifying and illustrating clusters with &lt;code&gt;ggraph&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;The &lt;code&gt;ggraph&lt;/code&gt; package also supports the use of the &lt;code&gt;igraph::cluster_&lt;/code&gt; functions, which can be nicely used for a quick look at clusters. Here, both the detected clusters (using different colors) and the simulated groups (using different shapes) are shown. In contrast to the plots above, all relationships (or &lt;em&gt;edges&lt;/em&gt;) are shown, including those &amp;lt; 0.3, which makes the networks look much denser than in the other plots.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;network_df %&amp;gt;% 
+  select(from = Ind_A, to = Ind_B, weight = S1) %&amp;gt;% 
+  as_tbl_graph(directed = FALSE) %&amp;gt;% 
+  activate(nodes) %&amp;gt;% 
+  left_join(distinct(individual_df, name = Ind, group = Group),
+            by = &amp;quot;name&amp;quot;) %&amp;gt;%
+  mutate(detected_cluster = as.factor(group_louvain())) %&amp;gt;% 
+  ggraph(., layout = &amp;quot;fr&amp;quot;) +
+  geom_edge_arc(aes(width = weight),
+                alpha = 0.3, strength = 0.1) +
+  scale_edge_width(name = &amp;quot;Association Index&amp;quot;, range = c(0, 1.5)) +
+  geom_node_point(aes(fill = detected_cluster, shape = group),
+                  color = &amp;quot;black&amp;quot;, size = 4) +
+  scale_fill_brewer(type = &amp;quot;qual&amp;quot;, palette = 2) +
+  scale_shape_manual(values = c(21, 22, 23, 24)) +
+  theme_graph() +
+  guides(fill = guide_legend(override.aes = list(shape=21)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;It’s clear from this plot that group_a and group_b are put in the same cluster by the &lt;em&gt;louvain&lt;/em&gt; method.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Creation and Detection of Clusters in Social Networks - Part 1</title>
-      <link>/post/social-clusters-i/</link>
+      <link>/content/post/social-clusters-i/</link>
       <pubDate>Tue, 31 Dec 2019 00:00:00 +0000</pubDate>
-      <guid>/post/social-clusters-i/</guid>
+      <guid>/content/post/social-clusters-i/</guid>
       <description>
 
 
@@ -142,7 +669,7 @@ plot_beta &amp;lt;- function(x, alpha_beta, main = &amp;quot;&amp;quot;, xlab = 
             xlab = &amp;quot;Association Index&amp;quot;)
   
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from the different distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and for all scenarios. For S1 and S2, group A and B are defined as the close groups.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_weights &amp;lt;- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
   # Create empty vector for all weights
@@ -204,7 +731,7 @@ clustered_network_plot &amp;lt;- network_df %&amp;gt;%
   theme_graph()
 
 clustered_network_plot&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/clustered_social_networks_part_1/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
 As modeled above, S1 and S3 are very similar, except that group A and B are closer to each other in S1. S2 and S4 have both weaker within-group relationships compared to their counterparts S1 and S3, respectively. Thus, I have four different networks with different degrees of clustering, and in two of these networks, two of the four groups are closer to each other than to the other groups.&lt;/p&gt;
 &lt;p&gt;In the next post, I will use different algorithms from the &lt;code&gt;igraph&lt;/code&gt; package to check how well these clusters can be detected.&lt;/p&gt;
 &lt;/div&gt;
