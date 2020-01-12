@@ -2,25 +2,235 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts | Behaviour | Environment | Data</title>
-    <link>https://bedatablog.netlify.com/post/</link>
-      <atom:link href="https://bedatablog.netlify.com/post/index.xml" rel="self" type="application/rss+xml" />
+    <link>/post/</link>
+      <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     <description>Posts</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Sun, 05 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>https://bedatablog.netlify.com/img/icon-192.png</url>
+      <url>/img/icon-192.png</url>
       <title>Posts</title>
-      <link>https://bedatablog.netlify.com/post/</link>
+      <link>/post/</link>
     </image>
     
     <item>
-      <title>Creation and Detection of Clusters in Social Networks - Part 2</title>
-      <link>https://bedatablog.netlify.com/post/social-clusters-ii/</link>
-      <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>https://bedatablog.netlify.com/post/social-clusters-ii/</guid>
+      <title>African Mammals</title>
+      <link>/post/african-mammals-map/</link>
+      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/post/african-mammals-map/</guid>
       <description>
 
 
-&lt;p&gt;In the &lt;a href=&#34;https://bedatablog.netlify.com/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the &lt;code&gt;igraph&lt;/code&gt; package to test how well these simulated clusters can be (re)-detected.&lt;/p&gt;
+&lt;p&gt;Interested in the distribution of animal species on a global or continental level? This can be easily illustrated with R using the data provided by the &lt;a href=&#34;https://www.iucnredlist.org&#34;&gt;IUCN Red List&lt;/a&gt;. In this post, I will focus on mammals in Africa, the continent where I have conducted most of my field work. But the code below can be easily adapted to other areas of the world and other taxonomic groups of species, or only species at low or high risk of extinction (though the completeness of the IUCN data is variable across different groups).&lt;/p&gt;
+&lt;p&gt;In this post, I describe the following steps:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;Download and process the &lt;em&gt;IUCN Red List&lt;/em&gt; spatial data set for terrestrial mammals&lt;/li&gt;
+&lt;li&gt;Download a map of Africa&lt;/li&gt;
+&lt;li&gt;Create a hexagon grid for Africa&lt;/li&gt;
+&lt;li&gt;Combine species ranges with the grid and plot the map&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The processing and summarizing of the spatial data is mostly done with the impressive &lt;code&gt;sf&lt;/code&gt; package. For my first attempts to work with spatial data in R (more specifically with vector data), I used the &lt;code&gt;sp&lt;/code&gt; package. But the &lt;code&gt;sf&lt;/code&gt; package, which is the successor of the &lt;code&gt;sp&lt;/code&gt;, is much easier to use. Additionally, it integrates some of the &lt;a href=&#34;https://www.tidyverse.org&#34;&gt;&lt;code&gt;tidyverse&lt;/code&gt;&lt;/a&gt; functions, most importantly many of the &lt;code&gt;dplyr&lt;/code&gt; functions, which so many R users are already using for other purposes. Also, the &lt;code&gt;sf&lt;/code&gt; package is very well documented and the vignettes are extremely helpful. They can be found on the &lt;a href=&#34;https://github.com/r-spatial/sf&#34;&gt;github page of the package&lt;/a&gt; or by typing &lt;code&gt;vignette(package = &amp;quot;sf&amp;quot;)&lt;/code&gt;. I also would like to mention the book &lt;a href=&#34;https://geocompr.robinlovelace.net&#34;&gt;‘Geocomputation with R’&lt;/a&gt;, which is a very informative (open source) resource for anybody interested in working with spatial data in R.&lt;/p&gt;
+&lt;div id=&#34;download-and-process-the-iucn-red-list-spatial-data-set-for-terrestrial-mammals&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;1. Download and process the &lt;em&gt;IUCN Red List&lt;/em&gt; spatial data set for terrestrial mammals&lt;/h2&gt;
+&lt;div id=&#34;prepare-r&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;1.1 Prepare R&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rm(list = ls())
+library(tidyverse)
+library(sf)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;download-and-process-the-iucn-terrestial-mammals-shapefile&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;1.2 Download and process the &lt;em&gt;IUCN&lt;/em&gt; terrestial mammals shapefile&lt;/h3&gt;
+&lt;p&gt;The &lt;em&gt;IUCN Red List&lt;/em&gt; spatial data can be obtained &lt;a href=&#34;https://www.iucnredlist.org/resources/spatial-data-download&#34;&gt;here&lt;/a&gt;. The &lt;em&gt;IUCN&lt;/em&gt; datasets are freely available for non-commercial use, but they have to be downloaded manually because you have to register for an account and provide a description of the intended usage. For academic use, you can (usually) download the dataset immediately after you made your request.&lt;/p&gt;
+&lt;p&gt;The ranges of populations and species are all provided as polygons in the downloadable shapefiles. However, some species might be missing, and some ranges might be incomplete. Nevertheless, it is an impressive data set, and at least for primates, it looks fairly complete. Further details (and limitations) can be found on the &lt;em&gt;IUCN&lt;/em&gt; spatial data webpage.&lt;/p&gt;
+&lt;p&gt;For this post, I downloaded the “Terrestrial Mammal” datasets, which is about ~ 600 MB. Then, I moved the downloaded folder (‘TERRESTRIAL_MAMMALS’) into the folder “~/Sync/iucn_data/” on my harddrive and renamed it to ‘TERRESTRIAL_MAMMALS_2020_01_11’.&lt;/p&gt;
+&lt;p&gt;I split up the following process into two steps: 1) load, simplify (&lt;em&gt;i.e.&lt;/em&gt;, reduce the size of the object), and save the processed shapefile a .gpkg file; and 2) re-load the processed files. The first step will not be evaluated in the final notebook so that the 600 MB shapefile does not have to be processed every time I run this notebook.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mammals &amp;lt;- st_read(&amp;quot;~/Sync/iucn_data/TERRESTRIAL_MAMMALS_2020_01_11&amp;quot;)
+
+# Simplify the polygons to reduce the size of the object/file. This may take a
+# few moments but the size of the object (in the R environment) changes from 906
+# Mb to 8.4 Mb (with dTolerance = 5), which is much easier to handle.
+mammals_simple &amp;lt;- mammals %&amp;gt;% 
+  st_simplify(dTolerance = 5)
+
+# Write the object to a file and clean up. I use .gpkg extension here because it
+# just requires one file instead of several files created for shapefiles. Also,
+# it&amp;#39;s an open format and it appears to be just as good as shapefiles (at least
+# for everything I&amp;#39;ve done so far). Look here for more information:
+# https://www.gis-blog.com/geopackage-vs-shapefile/
+st_write(mammals_simple, &amp;quot;data/iucn_mammal_distribution.gpkg&amp;quot;)
+rm(list = c(&amp;quot;mammals&amp;quot;, &amp;quot;mammals_simple&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;Note:&lt;/em&gt; I set the &lt;code&gt;dTolerance&lt;/code&gt; argument to 5, but for a more precise map, it might be good to change it to 0.1 or a lower value.&lt;/p&gt;
+&lt;p&gt;Now, load the file (step 2)&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mammals &amp;lt;- st_read(&amp;quot;data/iucn_mammal_distribution.gpkg&amp;quot;) %&amp;gt;% 
+  select(binomial, presence,legend, category)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Reading layer `iucn_mammal_distribution&amp;#39; from data source `/Users/urs/Google Drive/Data Blog/BED_Blog/content/post/african-mammals-map/data/iucn_mammal_distribution.gpkg&amp;#39; using driver `GPKG&amp;#39;
+## Simple feature collection with 12908 features and 27 fields (with 10729 geometries empty)
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: -179.999 ymin: -53.83276 xmax: 179.999 ymax: 89.9
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I only kept four of the columns: &lt;code&gt;binomial&lt;/code&gt; (the species name), &lt;code&gt;presence&lt;/code&gt; and &lt;code&gt;legend&lt;/code&gt; (indicating whether a population is still present), and &lt;code&gt;category&lt;/code&gt; (the risk category for each species). For other projects, additional columns can be added. For example, &lt;code&gt;order_&lt;/code&gt; or &lt;code&gt;family&lt;/code&gt; indicate the taxonomic order/family of a species.&lt;/p&gt;
+&lt;p&gt;Quick look at the sf object:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(mammals)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Simple feature collection with 6 features and 4 fields (with 4 geometries empty)
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: -58.02031 ymin: -23.35528 xmax: 29.50909 ymax: 7.832815
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+##                   binomial presence            legend category
+## 1 Nyctereutes procyonoides        1 Extant (resident)       LC
+## 2         Rattus lutreolus        1 Extant (resident)       LC
+## 3     Rhinolophus subrufus        1 Extant (resident)       DD
+## 4           Mops spurrelli        1 Extant (resident)       LC
+## 5         Clyomys laticeps        1 Extant (resident)       LC
+## 6       Eonycteris spelaea        1 Extant (resident)       LC
+##                             geom
+## 1             MULTIPOLYGON EMPTY
+## 2             MULTIPOLYGON EMPTY
+## 3             MULTIPOLYGON EMPTY
+## 4 MULTIPOLYGON (((16.12875 4....
+## 5 MULTIPOLYGON (((-47.53412 -...
+## 6             MULTIPOLYGON EMPTY&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For an explanation of sf objects, look at the &lt;a href=&#34;https://cran.r-project.org/web/packages/sf/vignettes/sf1.html&#34;&gt;first vignette of the sf package&lt;/a&gt;. Every row in this data frame represents one population of species &lt;code&gt;binomial&lt;/code&gt;, with additional information about the presence and risk category (columns &lt;code&gt;presence&lt;/code&gt;, &lt;code&gt;legend&lt;/code&gt;, and &lt;code&gt;category&lt;/code&gt;). The sf-column &lt;code&gt;geom&lt;/code&gt; contains the geographic information describing the range of each population. As far as I understand this data set, several populations might be combined into one row (the sf-column can contain several polygons), but in other cases, each population has its own row.&lt;/p&gt;
+&lt;p&gt;We can simply plot all polygons (for all rows) with:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot(st_geometry(mammals))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;This plot shows the distributions of all mammal species/populations, but it also includes populations that are no longer present. Let’s have a look at the different codes for &lt;code&gt;presence&lt;/code&gt; and the description, which can be found in the column &lt;code&gt;legend&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mammals %&amp;gt;%
+  st_set_geometry(NULL) %&amp;gt;%
+  distinct(presence, legend) %&amp;gt;% 
+  arrange(presence)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##    presence                                            legend
+## 1         1                                 Extant (resident)
+## 2         1                    Extant &amp;amp; Introduced (resident)
+## 3         1                  Extant &amp;amp; Reintroduced (resident)
+## 4         1          Extant &amp;amp; Vagrant (seasonality uncertain)
+## 5         1              Extant &amp;amp; Origin Uncertain (resident)
+## 6         1                    Extant (seasonality uncertain)
+## 7         1                             Extant (non-breeding)
+## 8         1                       Extant &amp;amp; Vagrant (resident)
+## 9         2                        Probably Extant (resident)
+## 10        2     Probably Extant &amp;amp; Origin Uncertain (resident)
+## 11        2           Probably Extant &amp;amp; Introduced (resident)
+## 12        3                        Possibly Extant (resident)
+## 13        3     Possibly Extant &amp;amp; Origin Uncertain (resident)
+## 14        3           Possibly Extant (seasonality uncertain)
+## 15        3                         Possibly Extant (passage)
+## 16        3 Possibly Extant &amp;amp; Vagrant (seasonality uncertain)
+## 17        3           Possibly Extant &amp;amp; Introduced (resident)
+## 18        3          Possibly Extant &amp;amp; Vagrant (non-breeding)
+## 19        4                                  Possibly Extinct
+## 20        4                     Possibly Extinct &amp;amp; Introduced
+## 21        5                                           Extinct
+## 22        5                        Extinct &amp;amp; Origin Uncertain
+## 23        5                              Extinct &amp;amp; Introduced
+## 24        5                            Extinct &amp;amp; Reintroduced
+## 25        6                                Presence Uncertain
+## 26        6             Presence Uncertain &amp;amp; Origin Uncertain
+## 27        6                      Presence Uncertain &amp;amp; Vagrant&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;  # knitr::kable()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Codes/numbers 1, 2, and 3 refer to ‘extant’, ‘probably extant’, and ‘possibly extant’ populations, and I only keep these populations here.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mammals_extant &amp;lt;- mammals %&amp;gt;% 
+  filter(presence %in% c(1,2,3))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;download-a-map-of-africa&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;2. Download a map of Africa&lt;/h2&gt;
+&lt;p&gt;In R, it’s very easy to get maps of countries or continents from &lt;a href=&#34;https://www.naturalearthdata.com&#34; class=&#34;uri&#34;&gt;https://www.naturalearthdata.com&lt;/a&gt; using the &lt;code&gt;rnaturalearth&lt;/code&gt; package. With the &lt;code&gt;ne_countries()&lt;/code&gt; function, all countries (as polygons) for the specified continent can be downloaded. Here, I am only interested in a map of the whole continent, not single countries. This can be achieved with the &lt;code&gt;dplyr::summarize()&lt;/code&gt; function, which ‘summarizes’ the polygons in all rows in the sf object (the countries) to one polygon (the continent). One of the examples showing how nicely the tidyverse functionality is integrated into the &lt;code&gt;sf&lt;/code&gt; package!&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;africa_map &amp;lt;- rnaturalearth::ne_countries(continent = &amp;quot;Africa&amp;quot;,
+                                          returnclass = &amp;quot;sf&amp;quot;) %&amp;gt;%
+  st_set_precision(1e9) %&amp;gt;%
+  summarize
+{
+par(mar = c(0, 0, 0, 0))
+plot(st_geometry(africa_map))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;create-a-hexagon-grid-for-africa&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;3. Create a hexagon grid for Africa&lt;/h2&gt;
+&lt;p&gt;Since I want to illustrate how species richness varies across regions, the number of species have to be summarized for some kind of (spatial) subsets of Africa. For example, this could be done by country. But here, I use a grid of equally sized hexagon cells to illustrate the varying species richness across the continent. This is possible with the &lt;code&gt;sf::st_make_grid()&lt;/code&gt; function. The argument &lt;code&gt;square = F&lt;/code&gt; specifies that hexagons are created instead of squares. Furthermore, I create a &lt;code&gt;grid_id&lt;/code&gt; column, which will be required as identifier for grid cells further below.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;africa_grid &amp;lt;- st_make_grid(africa_map,
+                            what = &amp;quot;polygons&amp;quot;,
+                            cellsize = 0.75,
+                            square = F) %&amp;gt;% 
+  st_sf() %&amp;gt;% 
+  mutate(grid_id = row_number())&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;Note&lt;/em&gt;: the cell size can be adjusted by changing the &lt;code&gt;cellsize&lt;/code&gt; argument, but this will also affect the number of species per cell. Larger cells are more likely to intersect with more species than smaller cells.&lt;/p&gt;
+&lt;p&gt;For the map, I only want to keep the parts of the grid cells that are on the continent. This might be problematic in some cases because the cells at the edge of the continent are smaller than cells within the continent. But since I only summarize terrestrial mammals here, I think it might also be misleading if the cells cover non-terrestrial area without including marine mammals.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;africa_grid_clipped &amp;lt;- st_intersection(africa_grid, africa_map)
+
+{
+plot(africa_map$geometry, reset = F, axes = T)
+plot(st_geometry(africa_grid_clipped), color = &amp;quot;white&amp;quot;,
+     add = T, border = rgb(0, 0, 0, 0.3))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;combine-species-ranges-with-the-grid-and-plot-the-map&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;4. Combine species ranges with the grid and plot the map&lt;/h2&gt;
+&lt;div id=&#34;only-keep-population-ranges-within-africa&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;4.1 Only keep population ranges within Africa&lt;/h3&gt;
+&lt;p&gt;With &lt;code&gt;st_intersection()&lt;/code&gt;, only the portion of population ranges within Africa are kept.
+Then, ranges are ‘summarized’ by species, which means that for species with several rows in the data frame, these rows are combined into one row with a (multi) polygon describing the entire range of this species. The use of &lt;code&gt;dplyr::group_by()&lt;/code&gt; in combination with &lt;code&gt;dplyr::summarize()&lt;/code&gt; with an sf object is another great example for the integration of the tidyverse functionality in the sf package.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;africa_mammals &amp;lt;- st_intersection(mammals, africa_map) %&amp;gt;% 
+  group_by(binomial) %&amp;gt;% 
+  summarize()
+{
+par(mar = c(2,2,2,2))
+plot(st_geometry(africa_mammals), axes = T)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;combine-ranges-with-the-grid&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;4.2 Combine ranges with the grid&lt;/h3&gt;
+&lt;p&gt;The range polygons can be combined with the grid map using the &lt;code&gt;sf::st_join()&lt;/code&gt; function. Then, the number of species is counted per grid cell using the &lt;code&gt;grid_id&lt;/code&gt; column created above.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# This may take a few minutes
+species_per_cell &amp;lt;- africa_grid_clipped %&amp;gt;% 
+  st_join(africa_mammals)
+
+species_per_cell_sums &amp;lt;- species_per_cell %&amp;gt;% 
+  group_by(grid_id) %&amp;gt;% 
+  summarize(species_n = n())&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;create-the-plot&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;4.3 Create the plot&lt;/h3&gt;
+&lt;p&gt;The standard output with &lt;code&gt;plot()&lt;/code&gt; looks like this.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot(species_per_cell_sums[&amp;quot;species_n&amp;quot;])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The plot created with &lt;code&gt;plot()&lt;/code&gt; can be customized, but I find it easier to customize plots with the &lt;code&gt;ggplot2&lt;/code&gt; package. Therefore, I create another plot with &lt;code&gt;ggplot()&lt;/code&gt; using a different color palette, and applying some other modifications.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;african_mammals_map &amp;lt;- ggplot() +
+  geom_sf(data = species_per_cell_sums,
+          aes(fill = species_n),
+          size = 0) +
+  scale_fill_gradient2(name = &amp;quot;Number of\nSpecies&amp;quot;,
+                       low = &amp;quot;#004529&amp;quot;,
+                       mid = &amp;quot;#f7fcb9&amp;quot;,
+                       high = &amp;quot;#7f0000&amp;quot;,
+                       midpoint = max(species_per_cell_sums$species_n)/2) +
+  geom_sf(data = africa_map, fill = NA) +
+  labs(title = &amp;quot;Mammal Species in Africa&amp;quot;) +
+  theme_void() +
+  theme(legend.position = c(0.1, 0.1),
+        legend.justification = c(0, 0),
+        plot.title = element_text(hjust = .5))
+african_mammals_map&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Creation and Detection of Clusters in Social Networks - Part 2</title>
+      <link>/post/social-clusters-ii/</link>
+      <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/post/social-clusters-ii/</guid>
+      <description>
+
+
+&lt;p&gt;In the &lt;a href=&#34;/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the &lt;code&gt;igraph&lt;/code&gt; package to test how well these simulated clusters can be (re)-detected.&lt;/p&gt;
 &lt;div id=&#34;determine-clustering-using-different-methods-and-compare-the-results&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;2. Determine clustering using different methods and compare the results&lt;/h1&gt;
 &lt;div id=&#34;prepare-r&#34; class=&#34;section level3&#34;&gt;
@@ -34,9 +244,9 @@ library(igraph)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;recreate-the-network-from-previous-post&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;2.2 Recreate the network from previous post&lt;/h3&gt;
-&lt;p&gt;To avoid repetition, the code is not shown here, but can be copied from the &lt;a href=&#34;https://bedatablog.netlify.com/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;. The two objects that are required from there are &lt;code&gt;individual_df&lt;/code&gt; and &lt;code&gt;network_df&lt;/code&gt;.&lt;br /&gt;
+&lt;p&gt;To avoid repetition, the code is not shown here, but can be copied from the &lt;a href=&#34;/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;. The two objects that are required from there are &lt;code&gt;individual_df&lt;/code&gt; and &lt;code&gt;network_df&lt;/code&gt;.&lt;br /&gt;
 The networks looked like that:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;&lt;em&gt;One important note&lt;/em&gt;:&lt;/strong&gt; My motivation for this small project was my research on a group of ~50 adult red colobus monkeys. Therefore, I simulated networks where most individuals were somehow connected. The plot above, however, only shows association indices &lt;span class=&#34;math inline&#34;&gt;\(\ge\)&lt;/span&gt; 0.3 to make it easier to see the clusters. The complete network is much denser (see the final plot of this post). After finalizing the draft of this post, I realized that this may have affected how well (or not) the algorithms detected the (sub)-groups and therefore wanted to mention it here.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;use-different-algorithms-to-detect-clusters&#34; class=&#34;section level3&#34;&gt;
@@ -500,7 +710,7 @@ modularity_plot &amp;lt;- create_plot(df = cluster_summary,
                                y_title = &amp;quot;Modularity&amp;quot;)
 
 cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;conclusions&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;2.6 Conclusions&lt;/h3&gt;
@@ -532,7 +742,7 @@ cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&
   scale_shape_manual(values = c(21, 22, 23, 24)) +
   theme_graph() +
   guides(fill = guide_legend(override.aes = list(shape=21)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;It’s clear from this plot that group_a and group_b are put in the same cluster by the &lt;em&gt;louvain&lt;/em&gt; method.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -541,9 +751,9 @@ cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&
     
     <item>
       <title>Creation and Detection of Clusters in Social Networks - Part 1</title>
-      <link>https://bedatablog.netlify.com/post/social-clusters-i/</link>
+      <link>/post/social-clusters-i/</link>
       <pubDate>Tue, 31 Dec 2019 00:00:00 +0000</pubDate>
-      <guid>https://bedatablog.netlify.com/post/social-clusters-i/</guid>
+      <guid>/post/social-clusters-i/</guid>
       <description>
 
 
@@ -669,7 +879,7 @@ plot_beta &amp;lt;- function(x, alpha_beta, main = &amp;quot;&amp;quot;, xlab = 
             xlab = &amp;quot;Association Index&amp;quot;)
   
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from the different distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and for all scenarios. For S1 and S2, group A and B are defined as the close groups.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_weights &amp;lt;- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
   # Create empty vector for all weights
@@ -731,7 +941,7 @@ clustered_network_plot &amp;lt;- network_df %&amp;gt;%
   theme_graph()
 
 clustered_network_plot&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
 As modeled above, S1 and S3 are very similar, except that group A and B are closer to each other in S1. S2 and S4 have both weaker within-group relationships compared to their counterparts S1 and S3, respectively. Thus, I have four different networks with different degrees of clustering, and in two of these networks, two of the four groups are closer to each other than to the other groups.&lt;/p&gt;
 &lt;p&gt;In the next post, I will use different algorithms from the &lt;code&gt;igraph&lt;/code&gt; package to check how well these clusters can be detected.&lt;/p&gt;
 &lt;/div&gt;

@@ -1,0 +1,222 @@
+---
+title: African Mammals
+author: Urs Kalbitzer
+date: '2020-01-11'
+tags:
+  - IUCN
+  - R
+  - Red List
+  - rnaturalearth
+  - rpatial
+  - sf
+slug: african-mammals-map
+lastmod: '2020-01-11T16:55:58-05:00'
+featured: no
+image:
+  placement: 1
+  caption: ''
+  focal_point: Center
+  preview_only: no
+---
+
+
+
+<p>Interested in the distribution of animal species on a global or continental level? This can be easily illustrated with R using the data provided by the <a href="https://www.iucnredlist.org">IUCN Red List</a>. In this post, I will focus on mammals in Africa, the continent where I have conducted most of my field work. But the code below can be easily adapted to other areas of the world and other taxonomic groups of species, or only species at low or high risk of extinction (though the completeness of the IUCN data is variable across different groups).</p>
+<p>In this post, I describe the following steps:</p>
+<ol style="list-style-type: decimal">
+<li>Download and process the <em>IUCN Red List</em> spatial data set for terrestrial mammals</li>
+<li>Download a map of Africa</li>
+<li>Create a hexagon grid for Africa</li>
+<li>Combine species ranges with the grid and plot the map</li>
+</ol>
+<p>The processing and summarizing of the spatial data is mostly done with the impressive <code>sf</code> package. For my first attempts to work with spatial data in R (more specifically with vector data), I used the <code>sp</code> package. But the <code>sf</code> package, which is the successor of the <code>sp</code>, is much easier to use. Additionally, it integrates some of the <a href="https://www.tidyverse.org"><code>tidyverse</code></a> functions, most importantly many of the <code>dplyr</code> functions, which so many R users are already using for other purposes. Also, the <code>sf</code> package is very well documented and the vignettes are extremely helpful. They can be found on the <a href="https://github.com/r-spatial/sf">github page of the package</a> or by typing <code>vignette(package = &quot;sf&quot;)</code>. I also would like to mention the book <a href="https://geocompr.robinlovelace.net">‘Geocomputation with R’</a>, which is a very informative (open source) resource for anybody interested in working with spatial data in R.</p>
+<div id="download-and-process-the-iucn-red-list-spatial-data-set-for-terrestrial-mammals" class="section level2">
+<h2>1. Download and process the <em>IUCN Red List</em> spatial data set for terrestrial mammals</h2>
+<div id="prepare-r" class="section level3">
+<h3>1.1 Prepare R</h3>
+<pre class="r"><code>rm(list = ls())
+library(tidyverse)
+library(sf)</code></pre>
+</div>
+<div id="download-and-process-the-iucn-terrestial-mammals-shapefile" class="section level3">
+<h3>1.2 Download and process the <em>IUCN</em> terrestial mammals shapefile</h3>
+<p>The <em>IUCN Red List</em> spatial data can be obtained <a href="https://www.iucnredlist.org/resources/spatial-data-download">here</a>. The <em>IUCN</em> datasets are freely available for non-commercial use, but they have to be downloaded manually because you have to register for an account and provide a description of the intended usage. For academic use, you can (usually) download the dataset immediately after you made your request.</p>
+<p>The ranges of populations and species are all provided as polygons in the downloadable shapefiles. However, some species might be missing, and some ranges might be incomplete. Nevertheless, it is an impressive data set, and at least for primates, it looks fairly complete. Further details (and limitations) can be found on the <em>IUCN</em> spatial data webpage.</p>
+<p>For this post, I downloaded the “Terrestrial Mammal” datasets, which is about ~ 600 MB. Then, I moved the downloaded folder (‘TERRESTRIAL_MAMMALS’) into the folder “~/Sync/iucn_data/” on my harddrive and renamed it to ‘TERRESTRIAL_MAMMALS_2020_01_11’.</p>
+<p>I split up the following process into two steps: 1) load, simplify (<em>i.e.</em>, reduce the size of the object), and save the processed shapefile a .gpkg file; and 2) re-load the processed files. The first step will not be evaluated in the final notebook so that the 600 MB shapefile does not have to be processed every time I run this notebook.</p>
+<pre class="r"><code>mammals &lt;- st_read(&quot;~/Sync/iucn_data/TERRESTRIAL_MAMMALS_2020_01_11&quot;)
+
+# Simplify the polygons to reduce the size of the object/file. This may take a
+# few moments but the size of the object (in the R environment) changes from 906
+# Mb to 8.4 Mb (with dTolerance = 5), which is much easier to handle.
+mammals_simple &lt;- mammals %&gt;% 
+  st_simplify(dTolerance = 5)
+
+# Write the object to a file and clean up. I use .gpkg extension here because it
+# just requires one file instead of several files created for shapefiles. Also,
+# it&#39;s an open format and it appears to be just as good as shapefiles (at least
+# for everything I&#39;ve done so far). Look here for more information:
+# https://www.gis-blog.com/geopackage-vs-shapefile/
+st_write(mammals_simple, &quot;data/iucn_mammal_distribution.gpkg&quot;)
+rm(list = c(&quot;mammals&quot;, &quot;mammals_simple&quot;))</code></pre>
+<p><em>Note:</em> I set the <code>dTolerance</code> argument to 5, but for a more precise map, it might be good to change it to 0.1 or a lower value.</p>
+<p>Now, load the file (step 2)</p>
+<pre class="r"><code>mammals &lt;- st_read(&quot;data/iucn_mammal_distribution.gpkg&quot;) %&gt;% 
+  select(binomial, presence,legend, category)</code></pre>
+<pre><code>## Reading layer `iucn_mammal_distribution&#39; from data source `/Users/urs/Google Drive/Data Blog/BED_Blog/content/post/african-mammals-map/data/iucn_mammal_distribution.gpkg&#39; using driver `GPKG&#39;
+## Simple feature collection with 12908 features and 27 fields (with 10729 geometries empty)
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: -179.999 ymin: -53.83276 xmax: 179.999 ymax: 89.9
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs</code></pre>
+<p>I only kept four of the columns: <code>binomial</code> (the species name), <code>presence</code> and <code>legend</code> (indicating whether a population is still present), and <code>category</code> (the risk category for each species). For other projects, additional columns can be added. For example, <code>order_</code> or <code>family</code> indicate the taxonomic order/family of a species.</p>
+<p>Quick look at the sf object:</p>
+<pre class="r"><code>head(mammals)</code></pre>
+<pre><code>## Simple feature collection with 6 features and 4 fields (with 4 geometries empty)
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: -58.02031 ymin: -23.35528 xmax: 29.50909 ymax: 7.832815
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+##                   binomial presence            legend category
+## 1 Nyctereutes procyonoides        1 Extant (resident)       LC
+## 2         Rattus lutreolus        1 Extant (resident)       LC
+## 3     Rhinolophus subrufus        1 Extant (resident)       DD
+## 4           Mops spurrelli        1 Extant (resident)       LC
+## 5         Clyomys laticeps        1 Extant (resident)       LC
+## 6       Eonycteris spelaea        1 Extant (resident)       LC
+##                             geom
+## 1             MULTIPOLYGON EMPTY
+## 2             MULTIPOLYGON EMPTY
+## 3             MULTIPOLYGON EMPTY
+## 4 MULTIPOLYGON (((16.12875 4....
+## 5 MULTIPOLYGON (((-47.53412 -...
+## 6             MULTIPOLYGON EMPTY</code></pre>
+<p>For an explanation of sf objects, look at the <a href="https://cran.r-project.org/web/packages/sf/vignettes/sf1.html">first vignette of the sf package</a>. Every row in this data frame represents one population of species <code>binomial</code>, with additional information about the presence and risk category (columns <code>presence</code>, <code>legend</code>, and <code>category</code>). The sf-column <code>geom</code> contains the geographic information describing the range of each population. As far as I understand this data set, several populations might be combined into one row (the sf-column can contain several polygons), but in other cases, each population has its own row.</p>
+<p>We can simply plot all polygons (for all rows) with:</p>
+<pre class="r"><code>plot(st_geometry(mammals))</code></pre>
+<p><img src="/post/african-mammals-map/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>This plot shows the distributions of all mammal species/populations, but it also includes populations that are no longer present. Let’s have a look at the different codes for <code>presence</code> and the description, which can be found in the column <code>legend</code>.</p>
+<pre class="r"><code>mammals %&gt;%
+  st_set_geometry(NULL) %&gt;%
+  distinct(presence, legend) %&gt;% 
+  arrange(presence)</code></pre>
+<pre><code>##    presence                                            legend
+## 1         1                                 Extant (resident)
+## 2         1                    Extant &amp; Introduced (resident)
+## 3         1                  Extant &amp; Reintroduced (resident)
+## 4         1          Extant &amp; Vagrant (seasonality uncertain)
+## 5         1              Extant &amp; Origin Uncertain (resident)
+## 6         1                    Extant (seasonality uncertain)
+## 7         1                             Extant (non-breeding)
+## 8         1                       Extant &amp; Vagrant (resident)
+## 9         2                        Probably Extant (resident)
+## 10        2     Probably Extant &amp; Origin Uncertain (resident)
+## 11        2           Probably Extant &amp; Introduced (resident)
+## 12        3                        Possibly Extant (resident)
+## 13        3     Possibly Extant &amp; Origin Uncertain (resident)
+## 14        3           Possibly Extant (seasonality uncertain)
+## 15        3                         Possibly Extant (passage)
+## 16        3 Possibly Extant &amp; Vagrant (seasonality uncertain)
+## 17        3           Possibly Extant &amp; Introduced (resident)
+## 18        3          Possibly Extant &amp; Vagrant (non-breeding)
+## 19        4                                  Possibly Extinct
+## 20        4                     Possibly Extinct &amp; Introduced
+## 21        5                                           Extinct
+## 22        5                        Extinct &amp; Origin Uncertain
+## 23        5                              Extinct &amp; Introduced
+## 24        5                            Extinct &amp; Reintroduced
+## 25        6                                Presence Uncertain
+## 26        6             Presence Uncertain &amp; Origin Uncertain
+## 27        6                      Presence Uncertain &amp; Vagrant</code></pre>
+<pre class="r"><code>  # knitr::kable()</code></pre>
+<p>Codes/numbers 1, 2, and 3 refer to ‘extant’, ‘probably extant’, and ‘possibly extant’ populations, and I only keep these populations here.</p>
+<pre class="r"><code>mammals_extant &lt;- mammals %&gt;% 
+  filter(presence %in% c(1,2,3))</code></pre>
+</div>
+</div>
+<div id="download-a-map-of-africa" class="section level2">
+<h2>2. Download a map of Africa</h2>
+<p>In R, it’s very easy to get maps of countries or continents from <a href="https://www.naturalearthdata.com" class="uri">https://www.naturalearthdata.com</a> using the <code>rnaturalearth</code> package. With the <code>ne_countries()</code> function, all countries (as polygons) for the specified continent can be downloaded. Here, I am only interested in a map of the whole continent, not single countries. This can be achieved with the <code>dplyr::summarize()</code> function, which ‘summarizes’ the polygons in all rows in the sf object (the countries) to one polygon (the continent). One of the examples showing how nicely the tidyverse functionality is integrated into the <code>sf</code> package!</p>
+<pre class="r"><code>africa_map &lt;- rnaturalearth::ne_countries(continent = &quot;Africa&quot;,
+                                          returnclass = &quot;sf&quot;) %&gt;%
+  st_set_precision(1e9) %&gt;%
+  summarize
+{
+par(mar = c(0, 0, 0, 0))
+plot(st_geometry(africa_map))
+}</code></pre>
+<p><img src="/post/african-mammals-map/index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="create-a-hexagon-grid-for-africa" class="section level2">
+<h2>3. Create a hexagon grid for Africa</h2>
+<p>Since I want to illustrate how species richness varies across regions, the number of species have to be summarized for some kind of (spatial) subsets of Africa. For example, this could be done by country. But here, I use a grid of equally sized hexagon cells to illustrate the varying species richness across the continent. This is possible with the <code>sf::st_make_grid()</code> function. The argument <code>square = F</code> specifies that hexagons are created instead of squares. Furthermore, I create a <code>grid_id</code> column, which will be required as identifier for grid cells further below.</p>
+<pre class="r"><code>africa_grid &lt;- st_make_grid(africa_map,
+                            what = &quot;polygons&quot;,
+                            cellsize = 0.75,
+                            square = F) %&gt;% 
+  st_sf() %&gt;% 
+  mutate(grid_id = row_number())</code></pre>
+<p><em>Note</em>: the cell size can be adjusted by changing the <code>cellsize</code> argument, but this will also affect the number of species per cell. Larger cells are more likely to intersect with more species than smaller cells.</p>
+<p>For the map, I only want to keep the parts of the grid cells that are on the continent. This might be problematic in some cases because the cells at the edge of the continent are smaller than cells within the continent. But since I only summarize terrestrial mammals here, I think it might also be misleading if the cells cover non-terrestrial area without including marine mammals.</p>
+<pre class="r"><code>africa_grid_clipped &lt;- st_intersection(africa_grid, africa_map)
+
+{
+plot(africa_map$geometry, reset = F, axes = T)
+plot(st_geometry(africa_grid_clipped), color = &quot;white&quot;,
+     add = T, border = rgb(0, 0, 0, 0.3))
+}</code></pre>
+<p><img src="/post/african-mammals-map/index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+<div id="combine-species-ranges-with-the-grid-and-plot-the-map" class="section level2">
+<h2>4. Combine species ranges with the grid and plot the map</h2>
+<div id="only-keep-population-ranges-within-africa" class="section level3">
+<h3>4.1 Only keep population ranges within Africa</h3>
+<p>With <code>st_intersection()</code>, only the portion of population ranges within Africa are kept.
+Then, ranges are ‘summarized’ by species, which means that for species with several rows in the data frame, these rows are combined into one row with a (multi) polygon describing the entire range of this species. The use of <code>dplyr::group_by()</code> in combination with <code>dplyr::summarize()</code> with an sf object is another great example for the integration of the tidyverse functionality in the sf package.</p>
+<pre class="r"><code>africa_mammals &lt;- st_intersection(mammals, africa_map) %&gt;% 
+  group_by(binomial) %&gt;% 
+  summarize()
+{
+par(mar = c(2,2,2,2))
+plot(st_geometry(africa_mammals), axes = T)
+}</code></pre>
+<p><img src="/post/african-mammals-map/index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+<div id="combine-ranges-with-the-grid" class="section level3">
+<h3>4.2 Combine ranges with the grid</h3>
+<p>The range polygons can be combined with the grid map using the <code>sf::st_join()</code> function. Then, the number of species is counted per grid cell using the <code>grid_id</code> column created above.</p>
+<pre class="r"><code># This may take a few minutes
+species_per_cell &lt;- africa_grid_clipped %&gt;% 
+  st_join(africa_mammals)
+
+species_per_cell_sums &lt;- species_per_cell %&gt;% 
+  group_by(grid_id) %&gt;% 
+  summarize(species_n = n())</code></pre>
+</div>
+<div id="create-the-plot" class="section level3">
+<h3>4.3 Create the plot</h3>
+<p>The standard output with <code>plot()</code> looks like this.</p>
+<pre class="r"><code>plot(species_per_cell_sums[&quot;species_n&quot;])</code></pre>
+<p><img src="/post/african-mammals-map/index_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>The plot created with <code>plot()</code> can be customized, but I find it easier to customize plots with the <code>ggplot2</code> package. Therefore, I create another plot with <code>ggplot()</code> using a different color palette, and applying some other modifications.</p>
+<pre class="r"><code>african_mammals_map &lt;- ggplot() +
+  geom_sf(data = species_per_cell_sums,
+          aes(fill = species_n),
+          size = 0) +
+  scale_fill_gradient2(name = &quot;Number of\nSpecies&quot;,
+                       low = &quot;#004529&quot;,
+                       mid = &quot;#f7fcb9&quot;,
+                       high = &quot;#7f0000&quot;,
+                       midpoint = max(species_per_cell_sums$species_n)/2) +
+  geom_sf(data = africa_map, fill = NA) +
+  labs(title = &quot;Mammal Species in Africa&quot;) +
+  theme_void() +
+  theme(legend.position = c(0.1, 0.1),
+        legend.justification = c(0, 0),
+        plot.title = element_text(hjust = .5))
+african_mammals_map</code></pre>
+<p><img src="/post/african-mammals-map/index_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+</div>

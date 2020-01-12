@@ -3,64 +3,94 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://bedatablog.netlify.com/</loc>
+    <loc>/post/african-mammals-map/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/iucn/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/red-list/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/rnaturalearth/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/rpatial/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/sf/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-01-11T16:55:58-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/social-clusters-ii/</loc>
     <lastmod>2020-01-05T20:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://bedatablog.netlify.com/post/social-clusters-ii/</loc>
+    <loc>/tags/ggraph/</loc>
     <lastmod>2020-01-05T20:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://bedatablog.netlify.com/tags/ggraph/</loc>
+    <loc>/tags/igraph/</loc>
     <lastmod>2020-01-05T20:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://bedatablog.netlify.com/tags/igraph/</loc>
+    <loc>/tags/social-networks/</loc>
     <lastmod>2020-01-05T20:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://bedatablog.netlify.com/post/</loc>
-    <lastmod>2020-01-05T20:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://bedatablog.netlify.com/tags/r/</loc>
-    <lastmod>2020-01-05T20:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://bedatablog.netlify.com/tags/social-networks/</loc>
-    <lastmod>2020-01-05T20:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://bedatablog.netlify.com/tags/</loc>
-    <lastmod>2020-01-05T20:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://bedatablog.netlify.com/post/social-clusters-i/</loc>
+    <loc>/post/social-clusters-i/</loc>
     <lastmod>2020-01-03T07:16:36-05:00</lastmod>
   </url>
   
   <url>
-    <loc>https://bedatablog.netlify.com/authors/admin/</loc>
+    <loc>/authors/admin/</loc>
   </url>
   
   <url>
-    <loc>https://bedatablog.netlify.com/authors/</loc>
+    <loc>/authors/</loc>
   </url>
   
   <url>
-    <loc>https://bedatablog.netlify.com/categories/</loc>
+    <loc>/categories/</loc>
   </url>
   
   <url>
-    <loc>https://bedatablog.netlify.com/publication_types/</loc>
+    <loc>/publication_types/</loc>
   </url>
   
 </urlset>

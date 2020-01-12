@@ -2,45 +2,85 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags | Behaviour | Environment | Data</title>
-    <link>https://bedatablog.netlify.com/tags/</link>
-      <atom:link href="https://bedatablog.netlify.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <link>/tags/</link>
+      <atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     <description>Tags</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Sun, 05 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>https://bedatablog.netlify.com/img/icon-192.png</url>
+      <url>/img/icon-192.png</url>
       <title>Tags</title>
-      <link>https://bedatablog.netlify.com/tags/</link>
+      <link>/tags/</link>
     </image>
     
     <item>
-      <title>ggraph</title>
-      <link>https://bedatablog.netlify.com/tags/ggraph/</link>
-      <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>https://bedatablog.netlify.com/tags/ggraph/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>igraph</title>
-      <link>https://bedatablog.netlify.com/tags/igraph/</link>
-      <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>https://bedatablog.netlify.com/tags/igraph/</guid>
+      <title>IUCN</title>
+      <link>/tags/iucn/</link>
+      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/iucn/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R</title>
-      <link>https://bedatablog.netlify.com/tags/r/</link>
+      <link>/tags/r/</link>
+      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Red List</title>
+      <link>/tags/red-list/</link>
+      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/red-list/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>rnaturalearth</title>
+      <link>/tags/rnaturalearth/</link>
+      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/rnaturalearth/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>rpatial</title>
+      <link>/tags/rpatial/</link>
+      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/rpatial/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sf</title>
+      <link>/tags/sf/</link>
+      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/sf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ggraph</title>
+      <link>/tags/ggraph/</link>
       <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>https://bedatablog.netlify.com/tags/r/</guid>
+      <guid>/tags/ggraph/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>igraph</title>
+      <link>/tags/igraph/</link>
+      <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/igraph/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Social Networks</title>
-      <link>https://bedatablog.netlify.com/tags/social-networks/</link>
+      <link>/tags/social-networks/</link>
       <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>https://bedatablog.netlify.com/tags/social-networks/</guid>
+      <guid>/tags/social-networks/</guid>
       <description></description>
     </item>
     
