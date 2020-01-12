@@ -513,7 +513,7 @@
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    9 min read
+    11 min read
   </span>
   
 
@@ -593,6 +593,9 @@ library(sf)</code></pre>
 mammals_simple &lt;- mammals %&gt;% 
   st_simplify(dTolerance = 5)
 
+mammals_simple &lt;- mammals_simple %&gt;% 
+  select(binomial, presence,legend, category)
+
 # Write the object to a file and clean up. I use .gpkg extension here because it
 # just requires one file instead of several files created for shapefiles. Also,
 # it&#39;s an open format and it appears to be just as good as shapefiles (at least
@@ -600,40 +603,67 @@ mammals_simple &lt;- mammals %&gt;%
 # https://www.gis-blog.com/geopackage-vs-shapefile/
 st_write(mammals_simple, &quot;data/iucn_mammal_distribution.gpkg&quot;)
 rm(list = c(&quot;mammals&quot;, &quot;mammals_simple&quot;))</code></pre>
-<p><em>Note:</em> I set the <code>dTolerance</code> argument to 5, but for a more precise map, it might be good to change it to 0.1 or a lower value.</p>
+<p><em>Note:</em> I set the <code>dTolerance</code> argument to 5, but for a more precise map, it might be good to change it to 0.1 or a lower value.<br />
+Also, I only kept four of the columns: <code>binomial</code> (the species name), <code>presence</code> and <code>legend</code> (indicating whether a population is still present), and <code>category</code> (the risk category for each species). For other projects, additional columns can be added. For example, <code>order_</code> or <code>family</code> indicate the taxonomic order/family of a species.</p>
 <p>Now, load the file (step 2)</p>
-<pre class="r"><code>mammals &lt;- st_read(&quot;data/iucn_mammal_distribution.gpkg&quot;) %&gt;% 
-  select(binomial, presence,legend, category)</code></pre>
+<pre class="r"><code>mammals &lt;- st_read(&quot;data/iucn_mammal_distribution.gpkg&quot;)</code></pre>
 <pre><code>## Reading layer `iucn_mammal_distribution&#39; from data source `/Users/urs/Google Drive/Data Blog/BED_Blog/content/post/african-mammals-map/data/iucn_mammal_distribution.gpkg&#39; using driver `GPKG&#39;
-## Simple feature collection with 12908 features and 27 fields (with 10729 geometries empty)
+## Simple feature collection with 25816 features and 27 fields (with 21458 geometries empty)
 ## geometry type:  MULTIPOLYGON
 ## dimension:      XY
 ## bbox:           xmin: -179.999 ymin: -53.83276 xmax: 179.999 ymax: 89.9
 ## epsg (SRID):    4326
 ## proj4string:    +proj=longlat +datum=WGS84 +no_defs</code></pre>
-<p>I only kept four of the columns: <code>binomial</code> (the species name), <code>presence</code> and <code>legend</code> (indicating whether a population is still present), and <code>category</code> (the risk category for each species). For other projects, additional columns can be added. For example, <code>order_</code> or <code>family</code> indicate the taxonomic order/family of a species.</p>
 <p>Quick look at the sf object:</p>
 <pre class="r"><code>head(mammals)</code></pre>
-<pre><code>## Simple feature collection with 6 features and 4 fields (with 4 geometries empty)
+<pre><code>## Simple feature collection with 6 features and 27 fields (with 4 geometries empty)
 ## geometry type:  MULTIPOLYGON
 ## dimension:      XY
 ## bbox:           xmin: -58.02031 ymin: -23.35528 xmax: 29.50909 ymax: 7.832815
 ## epsg (SRID):    4326
 ## proj4string:    +proj=longlat +datum=WGS84 +no_defs
-##                   binomial presence            legend category
-## 1 Nyctereutes procyonoides        1 Extant (resident)       LC
-## 2         Rattus lutreolus        1 Extant (resident)       LC
-## 3     Rhinolophus subrufus        1 Extant (resident)       DD
-## 4           Mops spurrelli        1 Extant (resident)       LC
-## 5         Clyomys laticeps        1 Extant (resident)       LC
-## 6       Eonycteris spelaea        1 Extant (resident)       LC
-##                             geom
-## 1             MULTIPOLYGON EMPTY
-## 2             MULTIPOLYGON EMPTY
-## 3             MULTIPOLYGON EMPTY
-## 4 MULTIPOLYGON (((16.12875 4....
-## 5 MULTIPOLYGON (((-47.53412 -...
-## 6             MULTIPOLYGON EMPTY</code></pre>
+##   id_no                 binomial presence origin seasonal
+## 1 14925 Nyctereutes procyonoides        1      1        1
+## 2 19343         Rattus lutreolus        1      1        1
+## 3 19571     Rhinolophus subrufus        1      1        1
+## 4 13848           Mops spurrelli        1      1        1
+## 5  4989         Clyomys laticeps        1      1        1
+## 6  7787       Eonycteris spelaea        1      1        1
+##                                 compiler yrcompiled
+## 1                                   IUCN       2016
+## 2                                   IUCN       2008
+## 3                                   IUCN       2016
+## 4                                   IUCN       2017
+## 5 IUCN SSC Small Mammal Specialist Group       2016
+## 6                                   IUCN       2014
+##                                                citation source dist_comm
+## 1 IUCN (International Union for Conservation of Nature)   &lt;NA&gt;      &lt;NA&gt;
+## 2 IUCN (International Union for Conservation of Nature)   &lt;NA&gt;      &lt;NA&gt;
+## 3 IUCN (International Union for Conservation of Nature)   &lt;NA&gt;      &lt;NA&gt;
+## 4 IUCN (International Union for Conservation of Nature)   &lt;NA&gt;      &lt;NA&gt;
+## 5                IUCN SSC Small Mammal Specialist Group   &lt;NA&gt;      &lt;NA&gt;
+## 6 IUCN (International Union for Conservation of Nature)   &lt;NA&gt;      &lt;NA&gt;
+##     island subspecies subpop            legend tax_comm  kingdom   phylum
+## 1 Sakhalin       &lt;NA&gt;   &lt;NA&gt; Extant (resident)     &lt;NA&gt; ANIMALIA CHORDATA
+## 2     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt; Extant (resident)     &lt;NA&gt; ANIMALIA CHORDATA
+## 3    Leyte       &lt;NA&gt;   &lt;NA&gt; Extant (resident)     &lt;NA&gt; ANIMALIA CHORDATA
+## 4     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt; Extant (resident)     &lt;NA&gt; ANIMALIA CHORDATA
+## 5     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt; Extant (resident)     &lt;NA&gt; ANIMALIA CHORDATA
+## 6   Batjan       &lt;NA&gt;   &lt;NA&gt; Extant (resident)     &lt;NA&gt; ANIMALIA CHORDATA
+##      class     order_        family       genus category marine terrestial
+## 1 MAMMALIA  CARNIVORA       CANIDAE Nyctereutes       LC  false       true
+## 2 MAMMALIA   RODENTIA       MURIDAE      Rattus       LC  false       true
+## 3 MAMMALIA CHIROPTERA RHINOLOPHIDAE Rhinolophus       DD  false       true
+## 4 MAMMALIA CHIROPTERA    MOLOSSIDAE        Mops       LC  false       true
+## 5 MAMMALIA   RODENTIA    ECHIMYIDAE     Clyomys       LC  false       true
+## 6 MAMMALIA CHIROPTERA  PTEROPODIDAE  Eonycteris       LC  false       true
+##   freshwater SHAPE_Leng  SHAPE_Area                           geom
+## 1      false  18.424712   5.1081886             MULTIPOLYGON EMPTY
+## 2      false 138.632223  26.0312524             MULTIPOLYGON EMPTY
+## 3      false   6.824693   0.5823338             MULTIPOLYGON EMPTY
+## 4      false  89.037316  84.5120813 MULTIPOLYGON (((16.12875 4....
+## 5      false  49.143669 146.1364764 MULTIPOLYGON (((-47.53412 -...
+## 6      false   2.672138   0.1534748             MULTIPOLYGON EMPTY</code></pre>
 <p>For an explanation of sf objects, look at the <a href="https://cran.r-project.org/web/packages/sf/vignettes/sf1.html">first vignette of the sf package</a>. Every row in this data frame represents one population of species <code>binomial</code>, with additional information about the presence and risk category (columns <code>presence</code>, <code>legend</code>, and <code>category</code>). The sf-column <code>geom</code> contains the geographic information describing the range of each population. As far as I understand this data set, several populations might be combined into one row (the sf-column can contain several polygons), but in other cases, each population has its own row.</p>
 <p>We can simply plot all polygons (for all rows) with:</p>
 <pre class="r"><code>plot(st_geometry(mammals))</code></pre>

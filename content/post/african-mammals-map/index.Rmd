@@ -57,6 +57,9 @@ mammals <- st_read("~/Sync/iucn_data/TERRESTRIAL_MAMMALS_2020_01_11")
 mammals_simple <- mammals %>% 
   st_simplify(dTolerance = 5)
 
+mammals_simple <- mammals_simple %>% 
+  select(binomial, presence,legend, category)
+
 # Write the object to a file and clean up. I use .gpkg extension here because it
 # just requires one file instead of several files created for shapefiles. Also,
 # it's an open format and it appears to be just as good as shapefiles (at least
@@ -67,14 +70,14 @@ rm(list = c("mammals", "mammals_simple"))
 ```
 
 _Note:_ I set the `dTolerance` argument to 5, but for a more precise map, it might be good to change it to 0.1 or a lower value.  
+Also, I only kept four of the columns: `binomial` (the species name), `presence` and `legend` (indicating whether a population is still present), and `category` (the risk category for each species). For other projects, additional columns can be added. For example, `order_` or `family` indicate the taxonomic order/family of a species.    
 
 Now, load the file (step 2)
 ```{r}
-mammals <- st_read("data/iucn_mammal_distribution.gpkg") %>% 
-  select(binomial, presence,legend, category)
+mammals <- st_read("data/iucn_mammal_distribution.gpkg")
 ```
 
-I only kept four of the columns: `binomial` (the species name), `presence` and `legend` (indicating whether a population is still present), and `category` (the risk category for each species). For other projects, additional columns can be added. For example, `order_` or `family` indicate the taxonomic order/family of a species.  
+
 
 Quick look at the sf object:
 ```{r}
