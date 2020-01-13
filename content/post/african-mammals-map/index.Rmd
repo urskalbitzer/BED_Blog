@@ -10,7 +10,7 @@ tags:
   - rpatial
   - sf
 slug: african-mammals-map
-lastmod: '2020-01-11T16:55:58-05:00'
+lastmod: '2020-01-12T21:55:05-05:00'
 featured: no
 image:
   placement: 1
@@ -53,9 +53,9 @@ mammals <- st_read("~/Sync/iucn_data/TERRESTRIAL_MAMMALS_2020_01_11")
 
 # Simplify the polygons to reduce the size of the object/file. This may take a
 # few moments but the size of the object (in the R environment) changes from 906
-# Mb to 8.4 Mb (with dTolerance = 5), which is much easier to handle.
+# Mb to <10 Mb (with dTolerance = 5), which is much easier to handle.
 mammals_simple <- mammals %>% 
-  st_simplify(dTolerance = 5)
+  st_simplify(dTolerance = 1)
 
 mammals_simple <- mammals_simple %>% 
   select(binomial, presence,legend, category)
@@ -65,21 +65,24 @@ mammals_simple <- mammals_simple %>%
 # it's an open format and it appears to be just as good as shapefiles (at least
 # for everything I've done so far). Look here for more information:
 # https://www.gis-blog.com/geopackage-vs-shapefile/
-st_write(mammals_simple, "data/iucn_mammal_distribution.gpkg")
-rm(list = c("mammals", "mammals_simple"))
+file_name <- paste0(dirname(here::here()), "/blog_data/iucn_mammal_distribution.gpkg")
+st_write(mammals_simple, file_name)
+rm(list = c("mammals", "mammals_simple", "file_name"))
 ```
 
-_Note:_ I set the `dTolerance` argument to 5, but for a more precise map, it might be good to change it to 0.1 or a lower value.  
+_Note:_ I set the `dTolerance` argument to 1, but for a more precise map, it might be good to change it to 0.1 or a lower value.  
 Also, I only kept four of the columns: `binomial` (the species name), `presence` and `legend` (indicating whether a population is still present), and `category` (the risk category for each species). For other projects, additional columns can be added. For example, `order_` or `family` indicate the taxonomic order/family of a species.    
 
 Now, load the file (step 2)
 ```{r}
-mammals <- st_read("data/iucn_mammal_distribution.gpkg")
+file_name <- paste0(dirname(here::here()),
+                    "/blog_data/iucn_mammal_distribution.gpkg")
+mammals <- st_read(file_name)
 ```
 
 
 
-Quick look at the sf object:
+Quick look at the `sf` object:
 ```{r}
 head(mammals)
 ```
@@ -88,7 +91,10 @@ For an explanation of sf objects, look at the [first vignette of the sf package]
 
 We can simply plot all polygons (for all rows) with:
 ```{r}
-plot(st_geometry(mammals))
+{
+  par(mar = c(0, 0, 0, 0))
+  plot(st_geometry(mammals))
+}
 ```
 
 This plot shows the distributions of all mammal species/populations, but it also includes populations that are no longer present. Let's have a look at the different codes for `presence` and the description, which can be found in the column `legend`.
@@ -98,7 +104,6 @@ mammals %>%
   st_set_geometry(NULL) %>%
   distinct(presence, legend) %>% 
   arrange(presence)
-  # knitr::kable()
 ```
 
 Codes/numbers 1, 2, and 3 refer to 'extant', 'probably extant', and 'possibly extant' populations, and I only keep these populations here.
@@ -117,8 +122,8 @@ africa_map <- rnaturalearth::ne_countries(continent = "Africa",
   st_set_precision(1e9) %>%
   summarize
 {
-par(mar = c(0, 0, 0, 0))
-plot(st_geometry(africa_map))
+  par(mar = c(0, 0, 0, 0))
+  plot(st_geometry(africa_map))
 }
 ```
 
@@ -144,9 +149,10 @@ For the map, I only want to keep the parts of the grid cells that are on the con
 africa_grid_clipped <- st_intersection(africa_grid, africa_map)
 
 {
-plot(africa_map$geometry, reset = F, axes = T)
-plot(st_geometry(africa_grid_clipped), color = "white",
-     add = T, border = rgb(0, 0, 0, 0.3))
+  par(mar = c(0, 0, 0, 0))
+  plot(africa_map$geometry, reset = F, axes = F)
+  plot(st_geometry(africa_grid_clipped), color = "white",
+       add = T, border = rgb(0, 0, 0, 0.3))
 }
 ```
 
@@ -162,8 +168,8 @@ africa_mammals <- st_intersection(mammals, africa_map) %>%
   group_by(binomial) %>% 
   summarize()
 {
-par(mar = c(2,2,2,2))
-plot(st_geometry(africa_mammals), axes = T)
+  par(mar = c(0, 0, 0, 0))
+  plot(st_geometry(africa_mammals))
 }
 ```
 
