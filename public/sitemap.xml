@@ -3,22 +3,72 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/climate/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/download-and-illustrate-current-and-projected-climate-in-r/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/ggplot/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/patchwork/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/raster/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/rnaturalearth/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/sf/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/south-america/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/stars/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/post/african-mammals-map/</loc>
     <lastmod>2020-01-12T21:55:05-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/</loc>
-    <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/iucn/</loc>
-    <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
     <lastmod>2020-01-12T21:55:05-05:00</lastmod>
   </url>
   
@@ -33,22 +83,7 @@
   </url>
   
   <url>
-    <loc>/tags/rnaturalearth/</loc>
-    <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/rpatial/</loc>
-    <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/sf/</loc>
-    <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
     <lastmod>2020-01-12T21:55:05-05:00</lastmod>
   </url>
   

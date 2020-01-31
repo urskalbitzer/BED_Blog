@@ -5,12 +5,76 @@
     <link>/tags/</link>
       <atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     <description>Tags</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Thu, 30 Jan 2020 00:00:00 +0000</lastBuildDate>
     <image>
       <url>/img/icon-192.png</url>
       <title>Tags</title>
       <link>/tags/</link>
     </image>
+    
+    <item>
+      <title>climate</title>
+      <link>/tags/climate/</link>
+      <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/climate/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>ggplot</title>
+      <link>/tags/ggplot/</link>
+      <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/ggplot/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>patchwork</title>
+      <link>/tags/patchwork/</link>
+      <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/patchwork/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>raster</title>
+      <link>/tags/raster/</link>
+      <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/raster/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>rnaturalearth</title>
+      <link>/tags/rnaturalearth/</link>
+      <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/rnaturalearth/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>sf</title>
+      <link>/tags/sf/</link>
+      <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/sf/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>South America</title>
+      <link>/tags/south-america/</link>
+      <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/south-america/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>stars</title>
+      <link>/tags/stars/</link>
+      <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/tags/stars/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>IUCN</title>
@@ -37,26 +101,10 @@
     </item>
     
     <item>
-      <title>rnaturalearth</title>
-      <link>/tags/rnaturalearth/</link>
-      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>/tags/rnaturalearth/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>rpatial</title>
       <link>/tags/rpatial/</link>
       <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
       <guid>/tags/rpatial/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>sf</title>
-      <link>/tags/sf/</link>
-      <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>/tags/sf/</guid>
       <description></description>
     </item>
     

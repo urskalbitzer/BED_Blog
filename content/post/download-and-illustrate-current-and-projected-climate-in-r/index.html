@@ -1,0 +1,255 @@
+---
+title: Download and illustrate current and projected climate data in R
+author: Urs Kalbitzer
+date: '2020-01-30'
+slug: download-and-illustrate-current-and-projected-climate-in-r
+categories: []
+tags:
+  - climate
+  - raster
+  - stars
+  - sf
+  - ggplot
+  - patchwork
+  - rnaturalearth
+  - South America
+lastmod: '2020-01-30T18:38:53-05:00'
+featured: no
+image:
+  placement: 1
+  caption: ''
+  focal_point: 'Center'
+  preview_only: no
+---
+
+
+
+<p>Current climate data, and projections how climate may change in the (near) future, are important for various reasons. For example, such data can be used to predict how habitat suitability for different animal and plant species or agricultural productivity changes over time.</p>
+<p>Thus, in this post, I am showing how to get data on recent and projected climate directly into R, crop the obtained object to the area of interest (here: South America), and then calculate and illustrate the projected change. These data can then be used for further analyses in R.</p>
+<p>The data are taken from <a href="http://worldclim.org">worldclim.org</a>, which provides climate projections from global climate models (GCM) following the Coupled Model Intercomparison Projects 5 (CMIP5) protocol. These models were used for the <a href="https://www.ipcc.ch/assessment-report/ar5/">5th report of the Intergovernmental Panel on Climate Change (IPCC) published in 2014</a>. New models are currently developed following CMIP6, and will be used for the 6th IPCC report. I hope/guess that there will be soon an easy way to get these newer predictions into R (please leave a comment if you know about such a way).</p>
+<p>For the GCMs, there are four representative concentration pathways (RCPs) describing different climate futures depending on the emitted volumes of greenhouse gases. I am using RCP 4.5 here, which assumes a peak decline in green house gases around 2040, followed by decreasing emission. This is a rather optimistic scenario.</p>
+<p>Here are the different steps:</p>
+<ol style="list-style-type: decimal">
+<li>Use the <code>getData</code> function from the <code>raster</code> package to get climate data into R.</li>
+<li>Get a map of South America with the <code>rnaturalearth</code> and <code>sf</code> packages.</li>
+<li>Crop the climate data to South America and calculate projected changes with the <code>stars</code> package.</li>
+<li>Use the <code>ggplot</code> and <code>patchwork</code> packages to illustrate the changes.</li>
+</ol>
+<p>Some additional resources:</p>
+<ul>
+<li><a href="https://r-spatial.github.io/stars/articles/stars1.html">Vignettes of the <code>stars</code> package</a></li>
+<li><a href="https://r-spatial.github.io/sf/articles/sf1.html">Vignettes of the <code>sf</code> package</a></li>
+<li><a href="https://geocompr.robinlovelace.net/">Online book on <em>Geocomputation with R</em></a> by Lovelace, Nowosad, and Muenchow</li>
+</ul>
+<div id="get-climate-data-with-rastergetdata" class="section level2">
+<h2>1. Get climate data with <code>raster::getData</code></h2>
+<div id="prepare-r" class="section level3">
+<h3>1.1 Prepare R</h3>
+<pre class="r"><code>rm(list = ls())
+library(stars)      # To process the raster data
+library(sf)         # To work with vector data
+library(ggplot2)    # For plotting
+library(patchwork)  # To combine different ggplot plots</code></pre>
+<p>Additional packages that are used: <code>raster</code> (to get the climate data), <code>rnaturalearth</code> (to get the map of South America).</p>
+</div>
+<div id="get-recent-climate-data" class="section level3">
+<h3>1.2 Get recent climate data</h3>
+<p>The <code>getData</code> function from the <code>raster</code> package makes it possible to easily download data on past, current/recent, and projected climate (and some other global geographic data sets. See <code>?raster::getData</code> for details).</p>
+<p>Here, I am downloading interpolations of observed data representative for the period 1960-1990 (it is also possible to get data for the period 1970-2000). To do so, I am using the following arguments:</p>
+<ul>
+<li><code>name = 'worldclim'</code> to download data from <a href="http://worldclim.org">worldclim.org</a>.</li>
+<li><code>var = 'bio'</code> to get annual averages for all available climate variables. Other possibilities are, <em>e.g.</em>, ‘tmin’ or ‘tmax’ for monthly minimum and maximum temperature.</li>
+<li><code>res = 10</code> for the resolution of 10 minutes of degree. This downloads the global data set. For higher resolutions (e.g., 2.5), the tile(s) have to be specified (with <code>lon</code> and <code>lat</code>).</li>
+<li><code>path</code> specifies that files are downloaded into subfolder ‘/blog_data’. For this dataset, the files ‘bio1.bil’ to ‘bio19.bil’ (plus ‘.hdr’ files) will be downloaded to ‘/blog_data/wc10/’.</li>
+</ul>
+<pre class="r"><code>file_path &lt;- paste0(dirname(here::here()), &quot;/blog_data/&quot;)
+raster::getData(name = &#39;worldclim&#39;, var = &#39;bio&#39;, res = 10,
+        path = file_path)</code></pre>
+<pre><code>## class      : RasterStack 
+## dimensions : 900, 2160, 1944000, 19  (nrow, ncol, ncell, nlayers)
+## resolution : 0.1666667, 0.1666667  (x, y)
+## extent     : -180, 180, -60, 90  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0 
+## names      :  bio1,  bio2,  bio3,  bio4,  bio5,  bio6,  bio7,  bio8,  bio9, bio10, bio11, bio12, bio13, bio14, bio15, ... 
+## min values :  -269,     9,     8,    72,   -59,  -547,    53,  -251,  -450,   -97,  -488,     0,     0,     0,     0, ... 
+## max values :   314,   211,    95, 22673,   489,   258,   725,   375,   364,   380,   289,  9916,  2088,   652,   261, ...</code></pre>
+</div>
+<div id="get-projected-climate-data" class="section level3">
+<h3>1.3 Get projected climate data</h3>
+<p>To get climate data projected for the period 2061-2080, I am using the following arguments:</p>
+<ul>
+<li><code>name = 'CMIP5'</code> to get data from the CMIP5 models.</li>
+<li><code>var = 'bio'</code>, which includes the same 19 variables for annual averages as for ‘worldclim’ (the set of variables other than ‘bio’ is very limited for ‘CMIP5’).</li>
+<li><code>res = 10</code> as above.</li>
+<li><code>rcp = 45</code> (see introduction)</li>
+<li><code>model = 'IP'</code> (the ‘IPSL-CM5A-LR’ model). Check <code>?raster::getData</code> for a list of all models. Perhaps, downloading all/a subset of models and then average projections is better than using a single model, but for the sake of simplicity, I only download this single model here.</li>
+<li><code>year = 70</code> to get projections for the period 2061-2080 (alternative is 50).</li>
+<li><code>path</code> as above. Files ‘ip45bi701.tif’- ‘ip45bi7019.tif’ will be downloaded to ‘/blog_data/cmip5/10m/’.</li>
+</ul>
+<pre class="r"><code>raster::getData(name = &#39;CMIP5&#39;, var = &#39;bio&#39;, res = 10,
+        rcp = 45, model = &#39;IP&#39;, year = 70,
+        path = file_path)</code></pre>
+<pre><code>## class      : RasterStack 
+## dimensions : 900, 2160, 1944000, 19  (nrow, ncol, ncell, nlayers)
+## resolution : 0.1666667, 0.1666667  (x, y)
+## extent     : -180, 180, -60, 90  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +no_defs 
+## names      : ip45bi701, ip45bi702, ip45bi703, ip45bi704, ip45bi705, ip45bi706, ip45bi707, ip45bi708, ip45bi709, ip45bi7010, ip45bi7011, ip45bi7012, ip45bi7013, ip45bi7014, ip45bi7015, ... 
+## min values :      -227,       -60,       -80,        86,       -22,      -512,        53,      -215,      -421,        -60,       -455,          0,          0,          0,          0, ... 
+## max values :       344,       217,        94,     22678,       524,       283,       729,       415,       401,        421,        320,      10541,       2701,        489,        222, ...</code></pre>
+</div>
+<div id="load-and-process-temperature-data" class="section level3">
+<h3>1.4 Load and process temperature data</h3>
+<p>The first variable from ‘bio’ is annual average temperature in 10 * °C. For recent data, the file name for this variable is ‘bio1.bil’, and for projected data ‘ip45bi701.tif’. Both can be loaded with the <code>read_stars</code> function from the <code>stars</code> package. Values have to be divided by 10 to get the temperature in °C (instead of 10 * °C)</p>
+<pre class="r"><code>annual_T &lt;- stars::read_stars(paste0(file_path, &quot;wc10/bio1.bil&quot;))
+annual_T &lt;- annual_T/10
+annual_T_70 &lt;- stars::read_stars(paste0(file_path, &quot;cmip5/10m/ip45bi701.tif&quot;))
+annual_T_70 &lt;- annual_T_70/10</code></pre>
+</div>
+<div id="quick-plots" class="section level3">
+<h3>1.5 Quick Plots</h3>
+<p>For the plots, I am defining a color palette for temperature. Colors are taken from the “5-class RdYlBu” palette from <a href="http://colorbrewer2.org" class="uri">http://colorbrewer2.org</a>.</p>
+<pre class="r"><code># The result, temp_colors, is a function with argument n for the number of
+# colors.
+temp_colors &lt;- colorRampPalette(c(&quot;#2c7bb6&quot;, &quot;#abd9e9&quot;, &quot;#ffffbf&quot;, &quot;#fdae61&quot;, &quot;#d7191c&quot;))</code></pre>
+<p>Then, global maps can be plotted with this color palette:</p>
+<pre class="r"><code>nbreaks &lt;- 20
+{
+  par(mfrow = c(1,2))
+  plot(annual_T, main = &quot;Annual temperature - 1960-1990&quot;,
+     nbreaks = nbreaks,
+     col = temp_colors(nbreaks - 1))
+  plot(annual_T_70, main = &quot;Annual temperature - RCP 4.5 projection for 2061-2080&quot;,
+     nbreaks = nbreaks,
+     col = temp_colors(nbreaks - 1))
+}</code></pre>
+<p><img src="/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-6-1.png" width="672" /><img src="/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
+<p><strong>Colors are not directly comparable between the two maps!</strong> The temperature range of each data set is used to define the color range for each map. Thus, in each map, the bluest color indicates the coolest temperature and the reddest color the hottest temperature, which differ between the two maps. This will be fixed in the plot below.</p>
+</div>
+</div>
+<div id="get-map-of-south-america" class="section level2">
+<h2>2. Get Map of South America</h2>
+<p>Get all countries from South America with the <code>rnaturalearth</code> package, and then combine them to a single shape.</p>
+<pre class="r"><code>south_america_map &lt;- rnaturalearth::ne_countries(continent = &quot;south america&quot;, returnclass = &quot;sf&quot;)
+# The precision has to be set to a value &gt; 0 to resolve internal boundaries.
+st_precision(south_america_map) &lt;- 1e9 # Required to
+south_america_map &lt;- st_union(south_america_map)
+
+{
+par(mar = c(0,0,0,0))
+plot(south_america_map)
+}</code></pre>
+<p><img src="/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="climate-of-south-america" class="section level2">
+<h2>3. Climate of South America</h2>
+<div id="crop-climate-raster-data-to-area-of-south-america" class="section level3">
+<h3>3.1 Crop climate raster data to area of South America</h3>
+<p>To crop a raster with the <code>stars</code> package, square brackets <code>[]</code> will work as crop operator (see <a href="https://r-spatial.github.io/stars/articles/stars1.html">here</a> for details).</p>
+<pre class="r"><code>annual_T_SA &lt;- annual_T[south_america_map]
+# CRS for projected T and south america map are the same (EPSG 4326) but the
+# proj4string includes more details for annual_T_70. Thus, they have to
+# be made identical before cropping.
+st_crs(annual_T_70) &lt;- st_crs(south_america_map)
+annual_T_70_SA &lt;- annual_T_70[south_america_map]</code></pre>
+<p>Quick plots:</p>
+<pre class="r"><code>{
+  par(mfrow = c(1, 2))
+  plot(annual_T_SA, main = &quot;Annual temperature - 1960-1990&quot;,
+       nbreaks = nbreaks,
+       col = temp_colors(nbreaks - 1))
+  plot(main = &quot;Annual temperature - RCP 4.5 projection for 2061-2080&quot;,
+       annual_T_70_SA, nbreaks = nbreaks,
+       col = temp_colors(nbreaks - 1))
+}</code></pre>
+<p><img src="/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-9-1.png" width="672" /><img src="/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-9-2.png" width="672" /></p>
+</div>
+<div id="get-some-basic-summaries" class="section level3">
+<h3>3.2 Get some basic summaries</h3>
+<p>The print method for <code>stars</code> objects provides some summary statistics, such as max, min, or median temperature.</p>
+<pre class="r"><code>annual_T_SA</code></pre>
+<pre><code>## stars object with 2 dimensions and 1 attribute
+## attribute(s):
+##    bio1.bil     
+##  Min.   :-6.50  
+##  1st Qu.:17.60  
+##  Median :24.00  
+##  Mean   :21.03  
+##  3rd Qu.:26.00  
+##  Max.   :29.00  
+##  NA&#39;s   :59262  
+## dimension(s):
+##   from  to offset     delta                       refsys point values    
+## x  592 872   -180  0.166667 +proj=longlat +datum=WGS8...    NA   NULL [x]
+## y  466 874     90 -0.166667 +proj=longlat +datum=WGS8...    NA   NULL [y]</code></pre>
+<p>But these values can also be manually calculated. For example, the mean temperature in South America for the period 1960 - 1990 is:</p>
+<pre class="r"><code>mean(annual_T$bio1.bil, na.rm = T)</code></pre>
+<pre><code>## [1] 8.144672</code></pre>
+<p>Currently, <code>bio1.bil</code> is the only attribute (<em>i.e.</em>, the variable with recent annual temperature) in the <code>annual_T</code> object, but <code>stars</code> objects can also include several attributes.</p>
+<p>Here, I will rename this attribute to <code>recent</code>. Then I will add the projected temperature from the other object (<code>annual_T_70_SA$ip45bi701.tif</code>) as a second attribute <code>projected</code>. Finally, I will calculate the difference between the two, which is the projected change.</p>
+<pre class="r"><code>names(annual_T_SA) &lt;- &quot;recent&quot;
+annual_T_SA$projected &lt;- annual_T_70_SA$ip45bi701.tif
+annual_T_SA$change &lt;- annual_T_SA$projected  - annual_T_SA$recent
+annual_T_SA</code></pre>
+<pre><code>## stars object with 2 dimensions and 3 attributes
+## attribute(s):
+##     recent         projected        change      
+##  Min.   :-6.50   Min.   :-4.00   Min.   :1.00   
+##  1st Qu.:17.60   1st Qu.:20.10   1st Qu.:2.50   
+##  Median :24.00   Median :26.80   Median :2.80   
+##  Mean   :21.03   Mean   :23.76   Mean   :2.73   
+##  3rd Qu.:26.00   3rd Qu.:28.80   3rd Qu.:3.00   
+##  Max.   :29.00   Max.   :31.70   Max.   :4.40   
+##  NA&#39;s   :59262   NA&#39;s   :59262   NA&#39;s   :59262  
+## dimension(s):
+##   from  to offset     delta                       refsys point values    
+## x  592 872   -180  0.166667 +proj=longlat +datum=WGS8...    NA   NULL [x]
+## y  466 874     90 -0.166667 +proj=longlat +datum=WGS8...    NA   NULL [y]</code></pre>
+</div>
+</div>
+<div id="illustrate-changes-in-temperature-with-ggplot-and-patchwork" class="section level2">
+<h2>4. Illustrate changes in temperature with <code>ggplot</code> and <code>patchwork</code></h2>
+<p>Here, we can use <code>scale_fill_gradientn</code> to define temperature colors, and then use the same limits for both plots. Now, colors are directly comparable between the plots for annual temperature. I will only use red colors for the change in temperature, as these values are always positive.</p>
+<pre class="r"><code>recent_T_plot &lt;- ggplot() + 
+  geom_stars(data = annual_T_SA) +
+  scale_fill_gradientn(name = &quot;Annual T [°C]&quot;,
+                       colors = temp_colors(5),
+                       limits = c(-7, 32),
+                       na.value = &quot;white&quot;) +
+  geom_sf(data = south_america_map, fill = NA) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  ggtitle(&quot;a) 1960-1990&quot;) +
+  theme_void() +
+  theme(legend.position = &quot;none&quot;)
+
+projected_T_plot &lt;- ggplot() + 
+  geom_stars(data = annual_T_SA[&quot;projected&quot;]) +
+  scale_fill_gradientn(name = &quot;Annual T [°C]&quot;,
+                       colors = temp_colors(5),
+                       limits = c(-7, 32),
+                       na.value = &quot;white&quot;) +
+  geom_sf(data = south_america_map, fill = NA) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  ggtitle(&quot;b) 2061-2080 (projected)&quot;) +
+  theme_void() +
+  theme(legend.position = &quot;bottom&quot;)
+
+projected_change_T_plot &lt;- ggplot() + 
+  geom_stars(data = annual_T_SA[&quot;change&quot;]) +
+  scale_fill_gradientn(name = &quot;Change in T [°C]&quot;,
+                       colors = temp_colors(5)[3:5],
+                       limits = c(1, 5),
+                       na.value = &quot;white&quot;) +
+  geom_sf(data = south_america_map, fill = NA) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  ggtitle(&quot;c) Projected change&quot;) +
+  theme_void() +
+  theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p>Finally, I will combine the three maps with the <code>patchwork</code> package (see <a href="https://patchwork.data-imaginist.com/articles/patchwork.html">here</a> for details).</p>
+<pre class="r"><code>(recent_T_plot / projected_T_plot + plot_layout(guides = &quot;keep&quot;)) | projected_change_T_plot +
+  theme(plot.margin = margin(c(0, 0, 0, 0)))</code></pre>
+<p><img src="/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+</div>
