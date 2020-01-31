@@ -104,7 +104,8 @@ For the plots, I am defining a color palette for temperature. Colors are taken f
 ```{r}
 # The result, temp_colors, is a function with argument n for the number of
 # colors.
-temp_colors <- colorRampPalette(c("#2c7bb6", "#abd9e9", "#ffffbf", "#fdae61", "#d7191c"))
+temp_colors <- colorRampPalette(c("#2c7bb6", "#abd9e9",
+                                  "#ffffbf", "#fdae61", "#d7191c"))
 ```
 
 Then, global maps can be plotted with this color palette:
@@ -128,7 +129,8 @@ nbreaks <- 20
 Get all countries from South America with the `rnaturalearth` package, and then combine them to a single shape.
 
 ```{r}
-south_america_map <- rnaturalearth::ne_countries(continent = "south america", returnclass = "sf")
+south_america_map <- rnaturalearth::ne_countries(continent = "south america",
+                                                 returnclass = "sf")
 # The precision has to be set to a value > 0 to resolve internal boundaries.
 st_precision(south_america_map) <- 1e9 # Required to
 south_america_map <- st_union(south_america_map)
@@ -177,7 +179,7 @@ mean(annual_T$bio1.bil, na.rm = T)
 ```
 Currently, `bio1.bil` is the only attribute (_i.e._, the variable with recent annual temperature) in the `annual_T` object, but `stars` objects can also include several attributes.  
 
-Here, I will rename this attribute to `recent`. Then I will add the projected temperature from the other object (`annual_T_70_SA$ip45bi701.tif`) as a second attribute `projected`. Finally, I will calculate the difference between the two, which is the projected change.
+Here, I am renaming this attribute to `recent`. Then I will add the projected temperature from the other object (`annual_T_70_SA$ip45bi701.tif`) as a second attribute `projected` and calculate the difference between the two, which is the projected change.
 
 ```{r}
 names(annual_T_SA) <- "recent"
