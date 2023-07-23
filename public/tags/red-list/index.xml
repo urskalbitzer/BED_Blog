@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Red List | Behaviour | Environment | Data</title>
-    <link>/tags/red-list/</link>
-      <atom:link href="/tags/red-list/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://bedatablog.netlify.com/tags/red-list/</link>
+      <atom:link href="https://bedatablog.netlify.com/tags/red-list/index.xml" rel="self" type="application/rss+xml" />
     <description>Red List</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2023</copyright><lastBuildDate>Sat, 11 Jan 2020 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
+      <url>https://bedatablog.netlify.com/img/icon-192.png</url>
       <title>Red List</title>
-      <link>/tags/red-list/</link>
+      <link>https://bedatablog.netlify.com/tags/red-list/</link>
     </image>
     
     <item>
       <title>African Mammals</title>
-      <link>/post/african-mammals-map/</link>
+      <link>https://bedatablog.netlify.com/post/african-mammals-map/</link>
       <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>/post/african-mammals-map/</guid>
+      <guid>https://bedatablog.netlify.com/post/african-mammals-map/</guid>
       <description>
 
 
@@ -103,7 +103,7 @@ mammals &amp;lt;- st_read(file_name)&lt;/code&gt;&lt;/pre&gt;
   par(mar = c(0, 0, 0, 0))
   plot(st_geometry(mammals))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;This plot shows the distributions of all mammal species/populations, but it also includes populations that are no longer present. Let’s have a look at the different codes for &lt;code&gt;presence&lt;/code&gt; and the description, which can be found in the column &lt;code&gt;legend&lt;/code&gt;.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mammals %&amp;gt;%
   st_set_geometry(NULL) %&amp;gt;%
@@ -153,7 +153,7 @@ mammals &amp;lt;- st_read(file_name)&lt;/code&gt;&lt;/pre&gt;
   par(mar = c(0, 0, 0, 0))
   plot(st_geometry(africa_map))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;create-a-hexagon-grid-for-africa&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;3. Create a hexagon grid for Africa&lt;/h2&gt;
@@ -174,7 +174,7 @@ mammals &amp;lt;- st_read(file_name)&lt;/code&gt;&lt;/pre&gt;
   plot(st_geometry(africa_grid_clipped), color = &amp;quot;white&amp;quot;,
        add = T, border = rgb(0, 0, 0, 0.3))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;combine-species-ranges-with-the-grid-and-plot-the-map&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;4. Combine species ranges with the grid and plot the map&lt;/h2&gt;
@@ -189,7 +189,7 @@ Then, ranges are ‘summarized’ by species, which means that for species with 
   par(mar = c(0, 0, 0, 0))
   plot(st_geometry(africa_mammals))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;combine-ranges-with-the-grid&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;4.2 Combine ranges with the grid&lt;/h3&gt;
@@ -206,7 +206,7 @@ species_per_cell_sums &amp;lt;- species_per_cell %&amp;gt;%
 &lt;h3&gt;4.3 Create the plot&lt;/h3&gt;
 &lt;p&gt;The standard output with &lt;code&gt;plot()&lt;/code&gt; looks like this.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot(species_per_cell_sums[&amp;quot;species_n&amp;quot;])&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The plot created with &lt;code&gt;plot()&lt;/code&gt; can be customized, but I find it easier to customize plots with the &lt;code&gt;ggplot2&lt;/code&gt; package. Therefore, I create another plot with &lt;code&gt;ggplot()&lt;/code&gt; using a different color palette, and applying some other modifications.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;african_mammals_map &amp;lt;- ggplot() +
   geom_sf(data = species_per_cell_sums,
@@ -224,7 +224,7 @@ species_per_cell_sums &amp;lt;- species_per_cell %&amp;gt;%
         legend.justification = c(0, 0),
         plot.title = element_text(hjust = .5))
 african_mammals_map&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 </description>

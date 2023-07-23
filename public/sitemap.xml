@@ -1,131 +1,84 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
-    <loc>/</loc>
+    <loc>https://bedatablog.netlify.com/</loc>
+    <lastmod>2023-07-22T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/post/food-simulation-i/</loc>
+    <lastmod>2023-07-22T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/post/</loc>
+    <lastmod>2023-07-22T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/r/</loc>
+    <lastmod>2023-07-22T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/</loc>
+    <lastmod>2023-07-22T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/climate/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/climate/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/download-and-illustrate-current-and-projected-climate-in-r/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/ggplot/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/ggplot/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/patchwork/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/patchwork/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/raster/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/rnaturalearth/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/raster/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/sf/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/rnaturalearth/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/south-america/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/sf/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/stars/</loc>
     <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/south-america/</loc>
-    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/stars/</loc>
-    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
-    <lastmod>2020-01-30T18:38:53-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/african-mammals-map/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/post/african-mammals-map/</loc>
     <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/iucn/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/iucn/</loc>
     <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/r/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/red-list/</loc>
     <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/red-list/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/rpatial/</loc>
     <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/rpatial/</loc>
-    <lastmod>2020-01-12T21:55:05-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/social-clusters-ii/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/post/social-clusters-ii/</loc>
     <lastmod>2020-01-05T20:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/ggraph/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/ggraph/</loc>
     <lastmod>2020-01-05T20:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/igraph/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/igraph/</loc>
     <lastmod>2020-01-05T20:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/social-networks/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/tags/social-networks/</loc>
     <lastmod>2020-01-05T20:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/social-clusters-i/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/post/social-clusters-i/</loc>
     <lastmod>2020-01-03T07:16:36-05:00</lastmod>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/authors/admin/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/authors/patrick-lauer/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/authors/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/categories/</loc>
+  </url><url>
+    <loc>https://bedatablog.netlify.com/publication_types/</loc>
   </url>
-  
-  <url>
-    <loc>/authors/admin/</loc>
-  </url>
-  
-  <url>
-    <loc>/authors/</loc>
-  </url>
-  
-  <url>
-    <loc>/categories/</loc>
-  </url>
-  
-  <url>
-    <loc>/publication_types/</loc>
-  </url>
-  
 </urlset>

@@ -2,21 +2,441 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts | Behaviour | Environment | Data</title>
-    <link>/post/</link>
-      <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://bedatablog.netlify.com/post/</link>
+      <atom:link href="https://bedatablog.netlify.com/post/index.xml" rel="self" type="application/rss+xml" />
     <description>Posts</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright><lastBuildDate>Thu, 30 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2023</copyright><lastBuildDate>Sat, 22 Jul 2023 00:00:00 +0000</lastBuildDate>
     <image>
-      <url>/img/icon-192.png</url>
+      <url>https://bedatablog.netlify.com/img/icon-192.png</url>
       <title>Posts</title>
-      <link>/post/</link>
+      <link>https://bedatablog.netlify.com/post/</link>
     </image>
     
     <item>
+      <title>Foraging Simulation following Geometric Framework Models  - Part 1</title>
+      <link>https://bedatablog.netlify.com/post/food-simulation-i/</link>
+      <pubDate>Sat, 22 Jul 2023 00:00:00 +0000</pubDate>
+      <guid>https://bedatablog.netlify.com/post/food-simulation-i/</guid>
+      <description>
+&lt;script src=&#34;https://bedatablog.netlify.com/post/food-simulation-i/index_files/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;https://bedatablog.netlify.com/post/food-simulation-i/index_files/viz/viz.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;https://bedatablog.netlify.com/post/food-simulation-i/index_files/DiagrammeR-styles/styles.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;https://bedatablog.netlify.com/post/food-simulation-i/index_files/grViz-binding/grViz.js&#34;&gt;&lt;/script&gt;
+
+&lt;div id=&#34;TOC&#34;&gt;
+
+&lt;/div&gt;
+
+&lt;p&gt;Conception, Idea, and Writing: Patrick Lauer and Urs Kalbitzer. Realization and Programming: Patrick Lauer.&lt;/p&gt;
+&lt;div id=&#34;introduction&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;Animals forage to meet their nutritional needs while avoiding potentially harmful components, such as toxins. &lt;strong&gt;Geometric Framework Models&lt;/strong&gt;, which have gained popularity in recent years, provide a framework that takes into account that there is rarely one single resource that satisfies an animal’s nutritional requirements and animals have to balance the consumption of different food resources with different nutritional compositions &lt;span class=&#34;citation&#34;&gt;(&lt;a href=&#34;#ref-lambert2015&#34;&gt;Lambert &amp;amp; Rothman, 2015&lt;/a&gt;; &lt;a href=&#34;#ref-simpson2011&#34;&gt;Simpson &amp;amp; Raubenheimer, 2011&lt;/a&gt;)&lt;/span&gt;. Thus, following Geometric Framework Models, the selection of food resources is not just based on general preferences for specific food items and their availability in the environment. Rather it depends on the animal’s nutritional goals, the composition (i.e. nutrients, harmful components) as well as the availability of food resources, and the animal’s current nutritional state (i.e. which nutrients have recently been consumed), see Figure &lt;a href=&#34;#fig:diag&#34;&gt;1&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Empirical studies on animal foraging behavior often focus on estimating preferences for different food items, which is usually done by calculating &lt;strong&gt;electivity indices&lt;/strong&gt; &lt;span class=&#34;citation&#34;&gt;(&lt;a href=&#34;#ref-manly2007&#34;&gt;Manly et al., 2007&lt;/a&gt;)&lt;/span&gt;. Such indices have been developed with the assumption that animals consume different food items proportionally to their preferences for, and the availability of, the different items in the environment. This, however, hardly captures the complex decision-making processes involved in foraging.&lt;/p&gt;
+&lt;p&gt;Assuming that Geometric Framework Models better reflect animal foraging decisions than just preference models, the applicability of such electivity indices is unclear. Therefore, &lt;strong&gt;we here simulate animals foraging according to such Geometric Framework Models to explore nutrient acquisition in different scenarios&lt;/strong&gt; &lt;strong&gt;(Part 1), and then calculate electivity indices based on the observed consumption of different food items to compare these indices with what we know about the foraging behavior of our simulated animals (Part 2).&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;&lt;span style=&#34;display:block;&#34; id=&#34;fig:diag&#34;&gt;&lt;/span&gt;
+&lt;div class=&#34;grViz html-widget html-fill-item-overflow-hidden html-fill-item&#34; id=&#34;htmlwidget-1&#34; style=&#34;width:672px;height:480px;&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-1&#34;&gt;{&#34;x&#34;:{&#34;diagram&#34;:&#34;digraph flowchart {\n  node [shape=box, style = filled];\n\n    7 [label = \&#34;Electivity Scores\&#34;, fillcolor = PaleGreen]\n\n  node[fillcolor = LightCoral]\n    2 [label = \&#34;Availability of Food Resources in the Environment\&#34;];\n    3 [label = \&#34;Composition of Food Resources\&#34;];\n    4 [label = \&#34;Overall Nutritional Goals\&#34;];\n\n  node[fillcolor = lightblue]\n    1 [label = \&#34;Diet\&#34;];\n    6 [label = \&#34;Subjective Availability of Food Resources\&#34;];\n    5 [label = \&#34;Current Nutritional State\&#34;];\n\n    2 -&gt; 6[arrowhead = \&#34;none\&#34;];\n    6 -&gt; 1;\n    3 -&gt; 1;\n    4 -&gt; 1;\n    5 -&gt; 1;\n    1 -&gt; 5;\n    1 -&gt; 7;\n    2 -&gt; 7;\n\nsubgraph {\n rank = same; 2; 3; 4;}}&#34;,&#34;config&#34;:{&#34;engine&#34;:&#34;dot&#34;,&#34;options&#34;:null}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 1: Diagram illustrating the assumptions simulated for Geometric Framework Models. The red coloured boxes highlight set parameters in the simulation.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;general-concept-of-the-simulation&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;General concept of the simulation&lt;/h2&gt;
+&lt;p&gt;The basic idea is that the (simulated) animals have an &lt;strong&gt;optimal, or target, ratio&lt;/strong&gt; of different nutrients, for example a ratio of proteins (P) to carbohydrates (C) of &lt;strong&gt;1P:1C&lt;/strong&gt;. There are &lt;strong&gt;different food items&lt;/strong&gt; in the environment, and these items vary with regard to their &lt;strong&gt;nutritional content&lt;/strong&gt;, for example item A has 3 units protein and 1 unit carbohydrates (= 3P:1C), whereas another item B has 1 unit proteins and 3 units carbohydrates (= 1P:3C). Thus, &lt;strong&gt;neither item will allow an animal to stay close to their target ratio of 1P:1C&lt;/strong&gt; and they have to feed from both items. In other words, after each feeding event, the ratio of consumed nutrients will deviate from the target ratio in one or another direction. This affects which food item should be eaten next. However, in our simulation (and in nature), different items can vary with regard to their &lt;strong&gt;availability&lt;/strong&gt;, it is thereby ‘easier’ for animals to consume more abundant items. This means that which item is selected in each feeding event depends on &lt;em&gt;(i)&lt;/em&gt; how much the ratio of consumed nutrients would deviate from the target ratio after eating that item and &lt;em&gt;(ii)&lt;/em&gt; the availability of different food items.&lt;/p&gt;
+&lt;p&gt;This simulation is done using the function &lt;code&gt;geometric_framework()&lt;/code&gt;, for which the code is provided below. For each individual, the simulation runs through &lt;em&gt;n&lt;/em&gt; feeding events. For each feeding event, the function calculates the cumulative units of each nutrient that would be consumed if a particular food item was eaten, and how much the new nutrient ratio would deviate from the target ratio. Based on this deviation and the availability of the item, the function calculates the relative probability of consuming each item, which is then used to determine which item is actually consumed (more details are provided below). The cumulative nutrient units consumed are updated for that individual after each feeding event.&lt;/p&gt;
+&lt;p&gt;This simulation is done for a given number of individuals, which currently all have the same nutritional target. Furthermore, all individuals can feed on the same food items, each item with a defined content of different nutrients. However, we simulate inter-individual variability in the availability of food items (subjective food availability) to mimic natural variation between individuals due to differences in feeding position, cognitive capacities (i.e., skills to find and utilize specific items) and other factors. This variability is realized using a beta-distribution. The function can be used to simulate different kinds of scenarios to explore how animals would move through their nutritional landscapes.&lt;/p&gt;
+&lt;p&gt;Currently, some options are still missing but we will implement them at a later stage:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Assigning potentially harmful components that an animal wants to avoid.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Simulating the expenditure of resources while foraging.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Defining more than two different nutrients per item.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Adding a “consumption effect”, thus a decrease in availability if an item was consumed.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Most of these options should be straightforward to implement the way we set up the function.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;calculating-the-deviation-from-optimal-nutrient-ratio-and-probability-of-selecting-food-items&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Calculating the deviation from optimal nutrient ratio and probability of selecting food items&lt;/h2&gt;
+&lt;p&gt;As described above, for each potentially consumed food item, the deviation from the optimal ratio of consumed nutrients has to be calculated. This however, comes with one challenge that is illustrated in Figure &lt;a href=&#34;#fig:fig-dev-optimal&#34;&gt;2&lt;/a&gt;. Consider a simple example with only two nutrients, a and b, where an animal has an optimal ratio of 1a:1b for these nutrients. If the animal has the option between an item with 3a:1b and another item with 1a:3b, the deviations resulting from consuming each item should be symmetrical, with 3 times more of nutrient a in one case and 3 times more of nutrient b in the other. However, differences between the slope of the original/optimal line (s0 = 1) and the slopes of the two new lines (s1 = 3 for Item 1 and s2 = 1/3 for Item 2) would be 3 - 1 = 2 and 1/3 - 1 = -2/3, respectively.&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;&lt;span style=&#34;display:block;&#34; id=&#34;fig:fig-dev-optimal&#34;&gt;&lt;/span&gt;
+&lt;img src=&#34;staticfig-dev-optimal-1.png&#34; alt=&#34;Potential deviation from optimal nutrient ratio when consuming different food items.&#34; width=&#34;672&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 2: Potential deviation from optimal nutrient ratio when consuming different food items.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;To overcome the challenge explained above, we can use the magnitudes of differences between the optimal slope &lt;span class=&#34;math inline&#34;&gt;\(s\\{optimal} =\frac{optimal{Nutrient1}}{optimal{Nutrient2}}\)&lt;/span&gt; and the potential new slope that arises when consuming a particular item &lt;span class=&#34;math inline&#34;&gt;\(s\\{new} =\frac{potential{Nutrient1}}{potential{Nutrient2}}\)&lt;/span&gt; . This can be done by using the log of the ratio between the new slope and the original slopes &lt;span class=&#34;math inline&#34;&gt;\(log(\frac{s\\{new}}{s\\{optimal}})\)&lt;/span&gt; . Using this approach, the deviations become symmetrical and can be compared, as illustrated in Figure &lt;a href=&#34;#fig:log-for-dev&#34;&gt;3&lt;/a&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;snew &amp;lt;- c(1/6:1, 2:6)
+s_opt_1 &amp;lt;- 1
+s_opt_2 &amp;lt;- 0.5
+plot(x = log(snew), y = log(snew/s_opt_1),
+     main = &amp;quot;For optimal ratio of 1a:1b&amp;quot;,
+     xaxt = &amp;quot;n&amp;quot;,
+     xlab = &amp;quot;New ratio&amp;quot;,
+     ylab = &amp;quot;Deviation: log(s_new/s_optimal)&amp;quot;)
+axis(side = 1, at = log(snew), labels = round(snew, 2),
+     las = 2)
+# Line for deviations
+lines(x = log(c(0.5, 1, 1, 1, 2)),
+            y = log(c(0.5, 0.5, 1, 2, 2)/s_opt_1),
+            lty = 1, col = &amp;quot;red&amp;quot;)
+# Optimal line
+lines(x = c(log(1), log(1)), y = c(log(min(snew)/1), log(max(snew)/1)),
+      lty = 2, col = &amp;quot;grey20&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;&lt;span style=&#34;display:block;&#34; id=&#34;fig:log-for-dev&#34;&gt;&lt;/span&gt;
+&lt;img src=&#34;staticlog-for-dev-1.png&#34; alt=&#34;Potential deviation from optimal nutrient ratio when consuming different food items illustrated as magnitude of slope differences.&#34; width=&#34;672&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 3: Potential deviation from optimal nutrient ratio when consuming different food items illustrated as magnitude of slope differences.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;The x-axis indicates the new ratio after consuming a food item with the vertical dashed line showing the optimal ratio. The y-axis illustrates the deviation calculated as described above. By using this approach the absolute value of the deviation between 1 (the optimal ratio) and the new ratio 1:2 (0.5) is the same as between the optimal ratio of 1 and the new ratio of 2:1 (2).&lt;/p&gt;
+&lt;p&gt;To put this into a formula, the deviation from the optimal ratio after consuming item &lt;em&gt;k&lt;/em&gt; by individual &lt;em&gt;j&lt;/em&gt; in feeding event &lt;em&gt;i&lt;/em&gt; is:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+deviation_{i, j, k} = log(\frac{slope_{optimal}}{slope_{i, j, k}})
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Here, &lt;span class=&#34;math inline&#34;&gt;\(slope_{i,j, k}\)&lt;/span&gt; is the slope of the line between 0 and consumed units of nutrients after the feeding event &lt;em&gt;i&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;It is important to note that the change in this deviation after each new food item becomes less severe if an individual has already consumed many items. That’s because we are using the cumulative amount of consumed nutrients which decreases the &lt;em&gt;relative&lt;/em&gt; importance of each new item for the ratio of already consumed nutrients. In other words, an individual becomes less picky if it has already consumed many nutrients because each new item would only have little impact on the ratio of consumed nutrients.&lt;/p&gt;
+&lt;p&gt;We then define the probability of choosing item &lt;em&gt;k&lt;/em&gt; by individual &lt;em&gt;j&lt;/em&gt; in feeding event &lt;em&gt;i&lt;/em&gt; (&lt;span class=&#34;math inline&#34;&gt;\(P_{i,j,k}\)&lt;/span&gt;) as:&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[
+P_{i, j, k} = (1 - (\frac{deviation_{i, j, k}}{threshold})^2) * availabilty_{i,k}
+\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Here, &lt;span class=&#34;math inline&#34;&gt;\(threshold\)&lt;/span&gt; is the maximum tolerable deviation of the nutritional ratio compared to the optimal ratio before an individual stops feeding on a particular item. And &lt;span class=&#34;math inline&#34;&gt;\(availability_{i,k}\)&lt;/span&gt; is the availability of food item &lt;em&gt;i&lt;/em&gt; for individual &lt;em&gt;k&lt;/em&gt;. Note that these are relative probabilities (or weights) calculated for each food item (per individual and feeding event) and they don’t sum up to 1 for each potential feeding event. In other words, if the deviation from the optimal value increases, the probability of selecting this specific food item decreases. The multiplication term for food availability &lt;span class=&#34;math inline&#34;&gt;\((1 - (\frac{deviation_{i, j, k}}{threshold})^2)\)&lt;/span&gt; is illustrated in Figure &lt;a href=&#34;#fig:fig-threshold&#34;&gt;4&lt;/a&gt; with different threshold values.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mfrow = c(1,2))
+curve((1 - (x/0.5)^2), from = -0.5, to = 0.5,
+      main = &amp;quot;Threshold = 0.5&amp;quot;,
+      xlab = &amp;quot;Deviation from optimal nutrient value&amp;quot;,
+      ylab = &amp;quot;Multiplicator for food availability&amp;quot;)
+curve((1 - (x/1)^2), from = -1, to = 1,
+      main = &amp;quot;Threshold = 1&amp;quot;,
+      xlab = &amp;quot;Deviation from optimal nutrient value&amp;quot;,
+      ylab = &amp;quot;Multiplicator for food availability&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;&lt;span style=&#34;display:block;&#34; id=&#34;fig:fig-threshold&#34;&gt;&lt;/span&gt;
+&lt;img src=&#34;staticfig-threshold-1.png&#34; alt=&#34;Weight of multiplication term for food availability with different threshold values.&#34; width=&#34;864&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 4: Weight of multiplication term for food availability with different threshold values.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;define-the-function&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Define the function&lt;/h2&gt;
+&lt;p&gt;The function below to simulate animals following Geometric Framework Models follows the logic explained above.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;geometric_framework &amp;lt;- function(items_nutrients = list(c(3,1), c(1,3), c(1,1)),
+                                items_availability = c(0.8, 0.8, 0.8),
+                                optimal_ratio = c(2,1),
+                                threshold_deviation = 1,
+                                n_feeding_events = 100,
+                                n_individuals = 10,
+                                initial_nutrients = c(0,0),
+                                return_class = c(&amp;quot;list&amp;quot;, &amp;quot;df&amp;quot;)) {
+  
+  # If no return class is specified, use first type in vector (here a list)  
+  return_class &amp;lt;- match.arg(return_class)
+  
+  ## Do some checks
+  if (length(items_nutrients) != length(items_availability))
+    stop(&amp;quot;Length of items_nutrients and items_availability differ.
+         Provide nutrients and availability for all items included.&amp;quot;)
+  if(any(lapply(items_nutrients, length) != 2)) stop(&amp;quot;Currently, only two types of nutrients per item allowed.&amp;quot;)
+  if(any(lapply(items_availability, length) != 1)) stop(&amp;quot;Provide one availability value per item.&amp;quot;)
+  
+  
+  ## Define Beta density function parameterized with &amp;quot;prob&amp;quot; and &amp;quot;theta&amp;quot; for adding
+  # &amp;quot;noise&amp;quot; to food availability. Taken from
+  # https://rdrr.io/github/rmcelreath/rethinking/src/R/distributions.r
+  rbeta2 &amp;lt;- function( n , prob , theta ) {
+    a &amp;lt;- prob * theta
+    b &amp;lt;- (1-prob) * theta
+    rbeta( n , shape1 = a , shape2 = b)
+  }
+  
+  ## Initialize Variables and Objects
+  
+  # Prior to the first feeding event, animals current nutrients are the set to initial_nutrients
+  current_nutrients_per_individual &amp;lt;- rep(list(initial_nutrients), n_individuals)
+  
+  # Set up helper variables and vector for probabilities to choose each item
+  n_nutrients &amp;lt;- length(items_nutrients[[1]])
+  n_items &amp;lt;- length(items_nutrients)
+  probability_weight_choosing_item &amp;lt;- rep(NA, n_items)
+  
+  # Set up matrix for items consumed with feeding events as rows and individuals as columns
+  items_consumed &amp;lt;- matrix(NA, nrow = n_feeding_events, ncol = n_individuals)
+  
+  # Set up array for consumed nutrients with feeding events as rows (first
+  # index), individuals as columns (second index), and the different nutrients in
+  # the third dimension (third index)
+  nutrients_consumed &amp;lt;- array(NA, dim = c(n_feeding_events, n_individuals, n_nutrients))
+  
+  dimnames(nutrients_consumed) &amp;lt;-  list( 1:n_feeding_events,
+                                         1:n_individuals,
+                                         1:n_nutrients)
+  
+  # Save parameters as attributes
+  attr(nutrients_consumed, &amp;quot;items_nutrients&amp;quot;) &amp;lt;- items_nutrients
+  attr(nutrients_consumed, &amp;quot;items_availability&amp;quot;) &amp;lt;- items_availability
+  attr(nutrients_consumed, &amp;quot;optimal_ratio&amp;quot;) &amp;lt;- optimal_ratio
+  
+  
+  # For each item, add inter-individual variability in food availability using the above defined function rbeta2
+  availability_per_individual &amp;lt;- t(sapply(items_availability, function(x)
+    rbeta2(n = n_individuals, prob = x, theta = 500)))
+  
+  ## Apply Geometric Framework assumptions to select which food item to include in diet
+  
+  # Go though all feeding events...
+  for (event_i in 1:n_feeding_events) { 
+    
+    #... and for each feeding event, through all individuals...
+    for (individual_j in 1:n_individuals) { 
+      
+       # ... and for each individual through all items.
+      for (item_k in 1:n_items) {
+        
+  # First, determine how nutrients would look like if item_k is added to current nutrients
+    potential_nutrients &amp;lt;- current_nutrients_per_individual[[individual_j]] + items_nutrients[[item_k]]
+        
+  # Transform optimal ratio and potential ratio from vector to numeric value
+    optimal_ratio_numeric &amp;lt;- optimal_ratio[1] / optimal_ratio[2]
+    potential_nutrient_ratio_numeric &amp;lt;- potential_nutrients[1] / potential_nutrients[2]
+
+  
+  # Calculate the deviation from the optimal nutrient acquisition if item_k was consumed 
+    deviation_from_optimal_nutrients &amp;lt;- log(optimal_ratio_numeric/ potential_nutrient_ratio_numeric)
+        
+  # Set probability to select item_k according to how much the nutrients
+  # deviate from the optimal amount.  Note that the probabilities
+  # for all different items don&amp;#39;t have to sum up to 1 to be
+  # used in `sample()`, they are rather considered as relative weights.
+        
+  # If deviation &amp;gt; threshold, set value to 0
+    if(abs(deviation_from_optimal_nutrients) &amp;gt; threshold_deviation){
+          probability_weight_choosing_item[item_k] &amp;lt;- 0
+    } else {
+     # Explanation in text, but in short: if deviation is 0, just use food
+     # availability as probability. With increasing deviation, put a larger
+     # penalty on item and decrease probability accordingly.The severity of 
+     # the penalty is dependent on the threshold of maximum &amp;quot;allowed&amp;quot; deviation 
+      probability_weight_choosing_item[item_k] &amp;lt;- (1 - (deviation_from_optimal_nutrients/threshold_deviation)^2) *
+      availability_per_individual[[item_k, individual_j]]
+     }
+        
+      }
+      
+  # Based on probability/weight, select one of the food items 
+      item_selected &amp;lt;- sample(x = 1:n_items, size = 1, prob = probability_weight_choosing_item)
+  
+  # Add the nutrients of the selected item to current nutrients
+      current_nutrients_per_individual[[individual_j]] &amp;lt;- current_nutrients_per_individual[[individual_j]] +
+        items_nutrients[[item_selected]]
+      
+  # Assign new current nutrient values to cells in array
+      nutrients_consumed[event_i, individual_j, ] &amp;lt;- current_nutrients_per_individual[[individual_j]]
+      
+  # Store information about which item was included in the diet in a matrix   
+      items_consumed[event_i, individual_j] &amp;lt;- item_selected
+      
+    }
+  }
+  
+  # Finally, return object according to return_class
+  if(return_class == &amp;quot;list&amp;quot;){
+    
+    geom_frame_list &amp;lt;- list(nutrients_consumed, items_consumed)
+    names(geom_frame_list) &amp;lt;- c(&amp;quot;Consumed Nutrient Units&amp;quot;, &amp;quot;Items in Diet&amp;quot;)
+    
+    return(geom_frame_list)
+    
+  }else if(return_class == &amp;quot;df&amp;quot;){
+    
+    nutrients_consumed_df &amp;lt;- as.data.frame(as.table(nutrients_consumed[,,1]))
+    names(nutrients_consumed_df) &amp;lt;- c(&amp;quot;Feeding_event&amp;quot;, &amp;quot;Individual&amp;quot;, &amp;quot;Nutrient1&amp;quot;)
+    nutrients_consumed_df$Nutrient2 &amp;lt;- as.vector(nutrients_consumed[,,2])
+    nutrients_consumed_df$Item_in_diet &amp;lt;- as.data.frame(as.table(items_consumed))[[3]]
+    
+    return(nutrients_consumed_df)
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;running-the-simulation-for-different-scenarios&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Running the simulation for different scenarios&lt;/h2&gt;
+&lt;p&gt;We test our function in a simple example. In a group of 10 individuals, each individual has the nutritional target of obtaining protein and carbohydrates in a 2P : 1C ratio. The three available food items in the environment have the following nutrient composition:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;item 1’s nutritional composition is 3P:1C&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;item 2’s nutritional composition is 1P:3C&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;item 3’s nutritional composition is 1P:1C&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To explore how the nutritional acquisition happens depending on limited resources, the individuals are “provided” with these three items in varying levels of availability in 3 different scenarios:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Scenario: All items are equally scarce.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Scenario: Only item 1 (3P:1C) is highly abundant, the remaining items are scarce.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Scenario: Only item 2 (1P:3C) is highly abundant, the remaining items are scarce.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div id=&#34;preparation-to-run-the-simulation&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Preparation to run the simulation&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## setup for function
+items_nutrients &amp;lt;- list(c(3,1), c(1,3), c(1,1))
+optimal_ratio &amp;lt;- c(2,1)
+threshold_deviation &amp;lt;- 1
+n_feeding_events &amp;lt;- 150
+n_individuals &amp;lt;- 10
+initial_nutrients &amp;lt;-  c(0,0)
+return_class &amp;lt;- &amp;quot;df&amp;quot;
+
+## setup for plotting
+library(ggplot2)
+theme_set(theme_minimal())
+optimal_carbohydrates &amp;lt;- 1:200
+optimal_protein &amp;lt;- 2* optimal_carbohydrates &lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;scenario-1-all-items-equally-scarce&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Scenario 1: All items equally scarce&lt;/h3&gt;
+&lt;p&gt;In this scenario we set each item to the same, scarce (0.2) availability value.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;items_availability_scenario1 &amp;lt;- c(0.2, 0.2, 0.2)
+
+gf_df1 &amp;lt;- geometric_framework(items_nutrients = items_nutrients,
+                              items_availability = items_availability_scenario1,
+                              optimal_ratio = optimal_ratio,
+                              threshold_deviation = threshold_deviation,
+                              n_feeding_events = n_feeding_events,
+                              n_individuals = n_individuals,
+                              initial_nutrients = initial_nutrients,
+                              return_class = return_class)
+  
+  
+head(gf_df1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
+## 1             1          1         1         1            3
+## 2             2          1         2         2            3
+## 3             3          1         5         3            1
+## 4             4          1         6         4            3
+## 5             5          1         9         5            1
+## 6             6          1        10         8            2&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We illustrate the nutrient acquisition over feeding events with equally highly available items in the individuals environment.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot() +
+  geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
+             alpha = 0.7, data = gf_df1) +
+  geom_line(aes(x = optimal_protein, y = optimal_carbohydrates)) +
+  ylim(0, 200) +
+  theme(legend.position = &amp;quot;none&amp;quot;) +
+  labs(title = &amp;quot;Nutrient acquisition when all items are equally scarce&amp;quot;,
+       x = &amp;quot;Units Proteins&amp;quot;,
+       y = &amp;quot;Units Carbohydrates&amp;quot;) &lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;&lt;span style=&#34;display:block;&#34; id=&#34;fig:fig-acq-sc1&#34;&gt;&lt;/span&gt;
+&lt;img src=&#34;staticfig-acq-sc1-1.png&#34; alt=&#34;Scenario 1 (items are equally scare) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line&#34; width=&#34;672&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 5: Scenario 1 (items are equally scare) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Figure &lt;a href=&#34;#fig:fig-acq-sc1&#34;&gt;5&lt;/a&gt; illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when all items are equally scarce in the environment. The nutritional goal of our simulated animals is to consume 2P:1C. We included two items (item 2 with 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C) that would lead to a higher protein consumption compared to the nutrient target.&lt;/p&gt;
+&lt;p&gt;When animals experience food scarcity they are not able to maintain their target ratio, but still consume more units proteins than expected by the relative availability. Especially in the first few feeding events, when the total nutrient acquisition is still low, they stay closer to the target ratio compared to later feeding events when already many nutrients have been consumed. Individuals become less selective the more total nutrients they have already consumed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;scenario-2-only-item-1-abundant&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Scenario 2: Only item 1 abundant&lt;/h3&gt;
+&lt;p&gt;In this scenario we set Item 1 (3P:1C) to a high availability of 0.8, whereas item 2 (1P:3C) and item 3 (1P:1C) are both set to a low availability of 0.2.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;items_availability_scenario2 &amp;lt;- c(0.8, 0.2, 0.2)
+
+gf_df2 &amp;lt;- geometric_framework(items_nutrients = items_nutrients,
+                              items_availability = items_availability_scenario2,
+                              optimal_ratio = optimal_ratio,
+                              threshold_deviation = threshold_deviation,
+                              n_feeding_events = n_feeding_events,
+                              n_individuals = n_individuals,
+                              initial_nutrients = initial_nutrients,
+                              return_class = return_class)
+
+  
+head(gf_df2)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
+## 1             1          1         3         1            1
+## 2             2          1         6         2            1
+## 3             3          1         9         3            1
+## 4             4          1        12         4            1
+## 5             5          1        15         5            1
+## 6             6          1        18         6            1&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We illustrate the nutrient acquisition over feeding events with only item 1, which has a high protein content and is abundant in the individuals’ environment. The remaining items are scarce.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot() +
+  geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
+             alpha = 0.7, data = gf_df2) +
+  geom_line(aes(x = optimal_protein, y = optimal_carbohydrates)) +
+    ylim(0, 200) +
+  theme(legend.position = &amp;quot;none&amp;quot;) +
+  labs(title = &amp;quot;Nutrient acquisition when only item 1 (3P:1C) is abundant&amp;quot;,
+       x = &amp;quot;Units Proteins&amp;quot;,
+       y = &amp;quot;Units Carbohydrates&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;&lt;span style=&#34;display:block;&#34; id=&#34;fig:fig-acq-sc2&#34;&gt;&lt;/span&gt;
+&lt;img src=&#34;staticfig-acq-sc2-1.png&#34; alt=&#34;Scenario 2 (only item 1 (3P:1C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line&#34; width=&#34;672&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 6: Scenario 2 (only item 1 (3P:1C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Figre &lt;a href=&#34;#fig:fig-acq-sc2&#34;&gt;6&lt;/a&gt; illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates (3P:1C), is abundant in the environment. The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C ) that would lead to a higher protein consumption compared to the nutrient target.&lt;/p&gt;
+&lt;p&gt;If animals are provided with enough protein sources (item 1 abundant) they maintain their target ratio. Especially in the first few feeding events, when the total nutrient acquisition is still low, staying close to the target ratio is more important than in later feeding events when already many nutrients have been consumed. As before, individuals become less picky the more they have consumed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;scenario-3-only-item-2-abundant&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Scenario 3: Only item 2 abundant&lt;/h3&gt;
+&lt;p&gt;In this scenario we set Item 2 (1P:3C) to a high availability of 0.8, whereas item 1 (3P:1C) and item 3 (1P:1C) are both set to a low availability of 0.2.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;items_availability_scenario3 &amp;lt;- c(0.2, 0.8, 0.2)
+
+gf_df3 &amp;lt;- geometric_framework(items_nutrients = items_nutrients,
+                              items_availability = items_availability_scenario3,
+                              optimal_ratio = optimal_ratio,
+                              threshold_deviation = threshold_deviation,
+                              n_feeding_events = n_feeding_events,
+                              n_individuals = n_individuals,
+                              initial_nutrients = initial_nutrients,
+                              return_class = return_class)
+
+head(gf_df3)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
+## 1             1          1         1         1            3
+## 2             2          1         2         2            3
+## 3             3          1         5         3            1
+## 4             4          1         6         4            3
+## 5             5          1         7         7            2
+## 6             6          1         8        10            2&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We illustrate the nutrient acquisition over feeding events with only item 2, which has a high carbohydrate content and is abundant in the individuals’ environment. The remaining items are scarce.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot() +
+  geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
+             alpha = 0.7, data = gf_df3) +
+  geom_line(aes(x = optimal_protein, y = optimal_carbohydrates)) +
+    ylim(0, 200) +
+  theme(legend.position = &amp;quot;none&amp;quot;) +
+  labs(title = &amp;quot;Nutrient acquisition when only item 2 (1P:3C) is abundant&amp;quot;,
+       x = &amp;quot;Units Proteins&amp;quot;,
+       y = &amp;quot;Units Carbohydrates&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;&lt;span style=&#34;display:block;&#34; id=&#34;fig:fig-acq-sc3&#34;&gt;&lt;/span&gt;
+&lt;img src=&#34;staticfig-acq-sc3-1.png&#34; alt=&#34;Scenario 3 (only item 2 (1P:3C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line&#34; width=&#34;672&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;
+Figure 7: Scenario 3 (only item 2 (1P:3C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Figure &lt;a href=&#34;#fig:fig-acq-sc3&#34;&gt;7&lt;/a&gt; illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates, is abundant in the environment.The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with 3P:1C) that would lead to a higher protein consumption compared to the nutrient target.&lt;/p&gt;
+&lt;p&gt;If animals are limited in their protein source (item 1 scarce) and primarily encounter carbohydrates while moving through their nutritional landscape (only item 2 abundant) they can’t maintain their target ratio and over consume carbohydrates.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;p&gt;In this example, we only included 3 items and simulated animals that aim to follow a nutritional ratio of 2P:1C. We included two items (item 2 with 1P:3C and item 3 with 1P:1C ) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with 3P:1C) that would lead to a higher protein consumption compared to the nutrient target. Under our set conditions, the animals can only maintain their target ratio when item 1 is more abundant than the other items (Scenario 2). The animals deviate from the target ratio when there is protein scarcity (Scenario 1) and especially when they primarily encounter items with different nutritional signatures, they may reach their limiting deviation to the optimal nutrient ratio (Scenario 3), while moving through their nutritional landscape.&lt;/p&gt;
+&lt;p&gt;In &lt;strong&gt;Part 2&lt;/strong&gt; we explore how well commonly used preference measures (namely electivity indices) can capture the preference of animals following Geometric Framework Models for different food items and how preference might change depending on resource limitations.&lt;/p&gt;
+&lt;div id=&#34;refs&#34; class=&#34;references csl-bib-body hanging-indent&#34; line-spacing=&#34;2&#34;&gt;
+&lt;div id=&#34;ref-lambert2015&#34; class=&#34;csl-entry&#34;&gt;
+Lambert, J. E., &amp;amp; Rothman, J. M. (2015). Fallback Foods, Optimal Diets, and Nutritional Targets: Primate Responses to Varying Food Availability and Quality. &lt;em&gt;Annual Review of Anthropology&lt;/em&gt;, &lt;em&gt;44&lt;/em&gt;(1), 493–512. &lt;a href=&#34;https://doi.org/10.1146/annurev-anthro-102313-025928&#34;&gt;https://doi.org/10.1146/annurev-anthro-102313-025928&lt;/a&gt;
+&lt;/div&gt;
+&lt;div id=&#34;ref-manly2007&#34; class=&#34;csl-entry&#34;&gt;
+Manly, B. F. J., McDonald, L. L., Thomas, D. L., McDonald, T. L., &amp;amp; Erickson, W. P. (2007). &lt;em&gt;Resource Selection by Animals&lt;/em&gt;. 231.
+&lt;/div&gt;
+&lt;div id=&#34;ref-simpson2011&#34; class=&#34;csl-entry&#34;&gt;
+Simpson, S. J., &amp;amp; Raubenheimer, D. (2011). The nature of nutrition: a unifying framework. &lt;em&gt;Australian Journal of Zoology&lt;/em&gt;, &lt;em&gt;59&lt;/em&gt;(6), 350. &lt;a href=&#34;https://doi.org/10.1071/ZO11068&#34;&gt;https://doi.org/10.1071/ZO11068&lt;/a&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Download and illustrate current and projected climate data in R</title>
-      <link>/post/download-and-illustrate-current-and-projected-climate-in-r/</link>
+      <link>https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/</link>
       <pubDate>Thu, 30 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>/post/download-and-illustrate-current-and-projected-climate-in-r/</guid>
+      <guid>https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/</guid>
       <description>
 
 
@@ -119,7 +539,7 @@ temp_colors &amp;lt;- colorRampPalette(c(&amp;quot;#2c7bb6&amp;quot;, &amp;quot;
      nbreaks = nbreaks,
      col = temp_colors(nbreaks - 1))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-6-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-6-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Colors are not directly comparable between the two maps!&lt;/strong&gt; The temperature range of each data set is used to define the color range for each map. Thus, in each map, the bluest color indicates the coolest temperature and the reddest color the hottest temperature, which differ between the two maps. This will be fixed in the plot below.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -135,7 +555,7 @@ south_america_map &amp;lt;- st_union(south_america_map)
 par(mar = c(0,0,0,0))
 plot(south_america_map)
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;climate-of-south-america&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;3. Climate of South America&lt;/h2&gt;
@@ -158,7 +578,7 @@ annual_T_70_SA &amp;lt;- annual_T_70[south_america_map]&lt;/code&gt;&lt;/pre&gt;
        annual_T_70_SA, nbreaks = nbreaks,
        col = temp_colors(nbreaks - 1))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-9-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-9-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;get-some-basic-summaries&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;3.2 Get some basic summaries&lt;/h3&gt;
@@ -247,16 +667,16 @@ projected_change_T_plot &amp;lt;- ggplot() +
 &lt;p&gt;Finally, I will combine the three maps with the &lt;code&gt;patchwork&lt;/code&gt; package (see &lt;a href=&#34;https://patchwork.data-imaginist.com/articles/patchwork.html&#34;&gt;here&lt;/a&gt; for details).&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(recent_T_plot / projected_T_plot + plot_layout(guides = &amp;quot;keep&amp;quot;)) | projected_change_T_plot +
   theme(plot.margin = margin(c(0, 0, 0, 0)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-14-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/download-and-illustrate-current-and-projected-climate-in-r/index_files/figure-html/unnamed-chunk-14-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>
     
     <item>
       <title>African Mammals</title>
-      <link>/post/african-mammals-map/</link>
+      <link>https://bedatablog.netlify.com/post/african-mammals-map/</link>
       <pubDate>Sat, 11 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>/post/african-mammals-map/</guid>
+      <guid>https://bedatablog.netlify.com/post/african-mammals-map/</guid>
       <description>
 
 
@@ -343,7 +763,7 @@ mammals &amp;lt;- st_read(file_name)&lt;/code&gt;&lt;/pre&gt;
   par(mar = c(0, 0, 0, 0))
   plot(st_geometry(mammals))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;This plot shows the distributions of all mammal species/populations, but it also includes populations that are no longer present. Let’s have a look at the different codes for &lt;code&gt;presence&lt;/code&gt; and the description, which can be found in the column &lt;code&gt;legend&lt;/code&gt;.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mammals %&amp;gt;%
   st_set_geometry(NULL) %&amp;gt;%
@@ -393,7 +813,7 @@ mammals &amp;lt;- st_read(file_name)&lt;/code&gt;&lt;/pre&gt;
   par(mar = c(0, 0, 0, 0))
   plot(st_geometry(africa_map))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;create-a-hexagon-grid-for-africa&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;3. Create a hexagon grid for Africa&lt;/h2&gt;
@@ -414,7 +834,7 @@ mammals &amp;lt;- st_read(file_name)&lt;/code&gt;&lt;/pre&gt;
   plot(st_geometry(africa_grid_clipped), color = &amp;quot;white&amp;quot;,
        add = T, border = rgb(0, 0, 0, 0.3))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;combine-species-ranges-with-the-grid-and-plot-the-map&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;4. Combine species ranges with the grid and plot the map&lt;/h2&gt;
@@ -429,7 +849,7 @@ Then, ranges are ‘summarized’ by species, which means that for species with 
   par(mar = c(0, 0, 0, 0))
   plot(st_geometry(africa_mammals))
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;combine-ranges-with-the-grid&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;4.2 Combine ranges with the grid&lt;/h3&gt;
@@ -446,7 +866,7 @@ species_per_cell_sums &amp;lt;- species_per_cell %&amp;gt;%
 &lt;h3&gt;4.3 Create the plot&lt;/h3&gt;
 &lt;p&gt;The standard output with &lt;code&gt;plot()&lt;/code&gt; looks like this.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot(species_per_cell_sums[&amp;quot;species_n&amp;quot;])&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The plot created with &lt;code&gt;plot()&lt;/code&gt; can be customized, but I find it easier to customize plots with the &lt;code&gt;ggplot2&lt;/code&gt; package. Therefore, I create another plot with &lt;code&gt;ggplot()&lt;/code&gt; using a different color palette, and applying some other modifications.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;african_mammals_map &amp;lt;- ggplot() +
   geom_sf(data = species_per_cell_sums,
@@ -464,7 +884,7 @@ species_per_cell_sums &amp;lt;- species_per_cell %&amp;gt;%
         legend.justification = c(0, 0),
         plot.title = element_text(hjust = .5))
 african_mammals_map&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/african-mammals-map/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/african-mammals-map/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 </description>
@@ -472,13 +892,13 @@ african_mammals_map&lt;/code&gt;&lt;/pre&gt;
     
     <item>
       <title>Creation and Detection of Clusters in Social Networks - Part 2</title>
-      <link>/post/social-clusters-ii/</link>
+      <link>https://bedatablog.netlify.com/post/social-clusters-ii/</link>
       <pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate>
-      <guid>/post/social-clusters-ii/</guid>
+      <guid>https://bedatablog.netlify.com/post/social-clusters-ii/</guid>
       <description>
 
 
-&lt;p&gt;In the &lt;a href=&#34;/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the &lt;code&gt;igraph&lt;/code&gt; package to test how well these simulated clusters can be (re)-detected.&lt;/p&gt;
+&lt;p&gt;In the &lt;a href=&#34;https://bedatablog.netlify.com/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;, I simulated clustered networks with varying strength of within-group, between-close-groups, and between-group social relationships. In part 2, I am using some of the methods provided by the &lt;code&gt;igraph&lt;/code&gt; package to test how well these simulated clusters can be (re)-detected.&lt;/p&gt;
 &lt;div id=&#34;determine-clustering-using-different-methods-and-compare-the-results&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;2. Determine clustering using different methods and compare the results&lt;/h1&gt;
 &lt;div id=&#34;prepare-r&#34; class=&#34;section level3&#34;&gt;
@@ -492,9 +912,9 @@ library(igraph)&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;recreate-the-network-from-previous-post&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;2.2 Recreate the network from previous post&lt;/h3&gt;
-&lt;p&gt;To avoid repetition, the code is not shown here, but can be copied from the &lt;a href=&#34;/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;. The two objects that are required from there are &lt;code&gt;individual_df&lt;/code&gt; and &lt;code&gt;network_df&lt;/code&gt;.&lt;br /&gt;
+&lt;p&gt;To avoid repetition, the code is not shown here, but can be copied from the &lt;a href=&#34;https://bedatablog.netlify.com/social-clusters-I/&#34;&gt;previous post&lt;/a&gt;. The two objects that are required from there are &lt;code&gt;individual_df&lt;/code&gt; and &lt;code&gt;network_df&lt;/code&gt;.&lt;br /&gt;
 The networks looked like that:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;&lt;em&gt;One important note&lt;/em&gt;:&lt;/strong&gt; My motivation for this small project was my research on a group of ~50 adult red colobus monkeys. Therefore, I simulated networks where most individuals were somehow connected. The plot above, however, only shows association indices &lt;span class=&#34;math inline&#34;&gt;\(\ge\)&lt;/span&gt; 0.3 to make it easier to see the clusters. The complete network is much denser (see the final plot of this post). After finalizing the draft of this post, I realized that this may have affected how well (or not) the algorithms detected the (sub)-groups and therefore wanted to mention it here.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;use-different-algorithms-to-detect-clusters&#34; class=&#34;section level3&#34;&gt;
@@ -958,7 +1378,7 @@ modularity_plot &amp;lt;- create_plot(df = cluster_summary,
                                y_title = &amp;quot;Modularity&amp;quot;)
 
 cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;conclusions&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;2.6 Conclusions&lt;/h3&gt;
@@ -990,7 +1410,7 @@ cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&
   scale_shape_manual(values = c(21, 22, 23, 24)) +
   theme_graph() +
   guides(fill = guide_legend(override.aes = list(shape=21)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-II/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-II/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;It’s clear from this plot that group_a and group_b are put in the same cluster by the &lt;em&gt;louvain&lt;/em&gt; method.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -999,9 +1419,9 @@ cowplot::plot_grid(cluster_plot, dyad_plot, modularity_plot, ncol = 3)&lt;/code&
     
     <item>
       <title>Creation and Detection of Clusters in Social Networks - Part 1</title>
-      <link>/post/social-clusters-i/</link>
+      <link>https://bedatablog.netlify.com/post/social-clusters-i/</link>
       <pubDate>Tue, 31 Dec 2019 00:00:00 +0000</pubDate>
-      <guid>/post/social-clusters-i/</guid>
+      <guid>https://bedatablog.netlify.com/post/social-clusters-i/</guid>
       <description>
 
 
@@ -1127,7 +1547,7 @@ plot_beta &amp;lt;- function(x, alpha_beta, main = &amp;quot;&amp;quot;, xlab = 
             xlab = &amp;quot;Association Index&amp;quot;)
   
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-I/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;These distributions can be used to get values for the strength of relationships. To do so, I first define a function to sample dyadic values from the different distributions depending on group membership of both individuals. Then, I use this function to get values for all dyads and for all scenarios. For S1 and S2, group A and B are defined as the close groups.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;get_weights &amp;lt;- function(network_df, wgr, bgr, bcgr = NA, close_groups = NA){
   # Create empty vector for all weights
@@ -1189,7 +1609,7 @@ clustered_network_plot &amp;lt;- network_df %&amp;gt;%
   theme_graph()
 
 clustered_network_plot&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;https://bedatablog.netlify.com/post/social-clusters-I/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;
 As modeled above, S1 and S3 are very similar, except that group A and B are closer to each other in S1. S2 and S4 have both weaker within-group relationships compared to their counterparts S1 and S3, respectively. Thus, I have four different networks with different degrees of clustering, and in two of these networks, two of the four groups are closer to each other than to the other groups.&lt;/p&gt;
 &lt;p&gt;In the next post, I will use different algorithms from the &lt;code&gt;igraph&lt;/code&gt; package to check how well these clusters can be detected.&lt;/p&gt;
 &lt;/div&gt;

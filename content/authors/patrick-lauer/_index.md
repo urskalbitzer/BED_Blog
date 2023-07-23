@@ -1,6 +1,6 @@
 ---
 authors:
-- admin
+- Patrick Lauer
 bio:
 education:
 email: ""

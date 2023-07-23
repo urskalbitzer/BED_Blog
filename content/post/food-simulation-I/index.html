@@ -10,7 +10,12 @@ subtitle: ''
 summary: ''
 authors: []
 lastmod: "2023-07-23 16:23:27 CEST"
-featured: no
+featured: yes
+image:
+  placement: 1
+  caption: ''
+  focal_point: 'Center'
+  preview_only: no
 projects: []
 commentable: true
 bibliography: references.bib
@@ -19,31 +24,19 @@ toc: true
 number-sections: true
 ---
 
-<script src="{{< blogdown/postref >}}index_files/htmlwidgets/htmlwidgets.js"></script>
-<script src="{{< blogdown/postref >}}index_files/viz/viz.js"></script>
-<link href="{{< blogdown/postref >}}index_files/DiagrammeR-styles/styles.css" rel="stylesheet" />
-<script src="{{< blogdown/postref >}}index_files/grViz-binding/grViz.js"></script>
 
 <div id="TOC">
 
 </div>
 
-<p>Conception, Idea, and Writing: Patrick Lauer and Urs Kalbitzer. Realization and Programming: Patrick Lauer.</p>
+<p><em>Conception, Idea, and Writing: Patrick Lauer and Urs Kalbitzer. Realization and Programming: Patrick Lauer.</em></p>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>Animals forage to meet their nutritional needs while avoiding potentially harmful components, such as toxins. <strong>Geometric Framework Models</strong>, which have gained popularity in recent years, provide a framework that takes into account that there is rarely one single resource that satisfies an animal’s nutritional requirements and animals have to balance the consumption of different food resources with different nutritional compositions <span class="citation">(<a href="#ref-lambert2015">Lambert &amp; Rothman, 2015</a>; <a href="#ref-simpson2011">Simpson &amp; Raubenheimer, 2011</a>)</span>. Thus, following Geometric Framework Models, the selection of food resources is not just based on general preferences for specific food items and their availability in the environment. Rather it depends on the animal’s nutritional goals, the composition (i.e. nutrients, harmful components) as well as the availability of food resources, and the animal’s current nutritional state (i.e. which nutrients have recently been consumed), see Figure <a href="#fig:diagram">1</a>.</p>
+<p>Animals forage to meet their nutritional needs while avoiding potentially harmful components, such as toxins. <strong>Geometric Framework Models</strong>, which have gained popularity in recent years, provide a framework that takes into account that there is rarely one single resource that satisfies an animal’s nutritional requirements and animals have to balance the consumption of different food resources with different nutritional compositions <span class="citation">(<a href="#ref-lambert2015">Lambert &amp; Rothman, 2015</a>; <a href="#ref-simpson2011">Simpson &amp; Raubenheimer, 2011</a>)</span>. Thus, following Geometric Framework Models, the selection of food resources is not just based on general preferences for specific food items and their availability in the environment. Rather it depends on the animal’s nutritional goals, the composition (i.e. nutrients, harmful components) as well as the availability of food resources, and the animal’s current nutritional state (i.e. which nutrients have recently been consumed):</p>
+<p><img src="diagram.png" /></p>
 <p>Empirical studies on animal foraging behavior often focus on estimating preferences for different food items, which is usually done by calculating <strong>electivity indices</strong> <span class="citation">(<a href="#ref-manly2007">Manly et al., 2007</a>)</span>. Such indices have been developed with the assumption that animals consume different food items proportionally to their preferences for, and the availability of, the different items in the environment. This, however, hardly captures the complex decision-making processes involved in foraging.</p>
-<p>Assuming that Geometric Framework Models better reflect animal foraging decisions than just preference models, the applicability of such electivity indices is unclear. Therefore, <strong>we here simulate animals foraging according to such Geometric Framework Models to explore nutrient acquisition in different scenarios</strong> <strong>(Part 1), and then calculate electivity indices based on the observed consumption of different food items to compare these indices with what we know about the foraging behavior of our simulated animals (Part 2).</strong></p>
-<div class="figure"><span style="display:block;" id="fig:diagram"></span>
-<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-1" style="width:672px;height:480px;"></div>
-<script type="application/json" data-for="htmlwidget-1">{"x":{"diagram":"\n digraph flowchart {\n  node [shape=box, style = filled];\n   \n    7 [label = \"Electivity Scores\", fillcolor = PaleGreen]\n\n  node[fillcolor = LightCoral]\n    2 [label = \"Availability of Food Resources in the Environment\"];\n    3 [label = \"Composition of Food Resources\"];\n    4 [label = \"Overall Nutritional Goals\"];\n   \n  node[fillcolor = lightblue]\n    1 [label = \"Diet\"];\n    6 [label = \"Subjective Availability of Food Resources\"];\n    5 [label = \"Current Nutritional State\"];\n    \n\n    2 -> 6[arrowhead = \"none\"];\n    6 -> 1;\n    3 -> 1;\n    4 -> 1;\n    5 -> 1;\n    1 -> 5;\n    1 -> 7;\n    2 -> 7;\n    \nsubgraph {\n rank = same; 2; 3; 4;\n } \n  }\n  \n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
-<p class="caption">
-Figure 1: Diagram illustrating the assumptions simulated for Geometric Framework Models. The red coloured boxes highlight set parameters in the simulation.
-</p>
-</div>
-</div>
-<div id="general-concept-of-the-simulation" class="section level2">
-<h2>General concept of the simulation</h2>
+<p>Assuming that Geometric Framework Models better reflect animal foraging decisions than just preference models, the applicability of such electivity indices is unclear. Therefore, <strong>we here simulate animals foraging according to such Geometric Framework Models to explore nutrient acquisition in different scenarios</strong> <strong>(Part 1), and then calculate electivity indices based on the observed consumption of different food items to compare these indices with what we know about the foraging behavior of our simulated animals (Part 2).</strong>
+## General concept of the simulation</p>
 <p>The basic idea is that the (simulated) animals have an <strong>optimal, or target, ratio</strong> of different nutrients, for example a ratio of proteins (P) to carbohydrates (C) of <strong>1P:1C</strong>. There are <strong>different food items</strong> in the environment, and these items vary with regard to their <strong>nutritional content</strong>, for example item A has 3 units protein and 1 unit carbohydrates (= 3P:1C), whereas another item B has 1 unit proteins and 3 units carbohydrates (= 1P:3C). Thus, <strong>neither item will allow an animal to stay close to their target ratio of 1P:1C</strong> and they have to feed from both items. In other words, after each feeding event, the ratio of consumed nutrients will deviate from the target ratio in one or another direction. This affects which food item should be eaten next. However, in our simulation (and in nature), different items can vary with regard to their <strong>availability</strong>, it is thereby ‘easier’ for animals to consume more abundant items. This means that which item is selected in each feeding event depends on <em>(i)</em> how much the ratio of consumed nutrients would deviate from the target ratio after eating that item and <em>(ii)</em> the availability of different food items.</p>
 <p>This simulation is done using the function <code>geometric_framework()</code>, for which the code is provided below. For each individual, the simulation runs through <em>n</em> feeding events. For each feeding event, the function calculates the cumulative units of each nutrient that would be consumed if a particular food item was eaten, and how much the new nutrient ratio would deviate from the target ratio. Based on this deviation and the availability of the item, the function calculates the relative probability of consuming each item, which is then used to determine which item is actually consumed (more details are provided below). The cumulative nutrient units consumed are updated for that individual after each feeding event.</p>
 <p>This simulation is done for a given number of individuals, which currently all have the same nutritional target. Furthermore, all individuals can feed on the same food items, each item with a defined content of different nutrients. However, we simulate inter-individual variability in the availability of food items (subjective food availability) to mimic natural variation between individuals due to differences in feeding position, cognitive capacities (i.e., skills to find and utilize specific items) and other factors. This variability is realized using a beta-distribution. The function can be used to simulate different kinds of scenarios to explore how animals would move through their nutritional landscapes.</p>
@@ -58,35 +51,18 @@ Figure 1: Diagram illustrating the assumptions simulated for Geometric Framework
 </div>
 <div id="calculating-the-deviation-from-optimal-nutrient-ratio-and-probability-of-selecting-food-items" class="section level2">
 <h2>Calculating the deviation from optimal nutrient ratio and probability of selecting food items</h2>
-<p>As described above, for each potentially consumed food item, the deviation from the optimal ratio of consumed nutrients has to be calculated. This however, comes with one challenge that is illustrated in Figure <a href="#fig:fig-dev-optimal">2</a>. Consider a simple example with only two nutrients, a and b, where an animal has an optimal ratio of 1a:1b for these nutrients. If the animal has the option between an item with 3a:1b and another item with 1a:3b, the deviations resulting from consuming each item should be symmetrical, with 3 times more of nutrient a in one case and 3 times more of nutrient b in the other. However, differences between the slope of the original/optimal line (s0 = 1) and the slopes of the two new lines (s1 = 3 for Item 1 and s2 = 1/3 for Item 2) would be 3 - 1 = 2 and 1/3 - 1 = -2/3, respectively.</p>
+<p>As described above, for each potentially consumed food item, the deviation from the optimal ratio of consumed nutrients has to be calculated. This however, comes with one challenge that is illustrated in Figure <a href="#fig:fig-dev-optimal">1</a>. Consider a simple example with only two nutrients, a and b, where an animal has an optimal ratio of 1a:1b for these nutrients. If the animal has the option between an item with 3a:1b and another item with 1a:3b, the deviations resulting from consuming each item should be symmetrical, with 3 times more of nutrient a in one case and 3 times more of nutrient b in the other. However, differences between the slope of the original/optimal line (s0 = 1) and the slopes of the two new lines (s1 = 3 for Item 1 and s2 = 1/3 for Item 2) would be 3 - 1 = 2 and 1/3 - 1 = -2/3, respectively.</p>
 <div class="figure"><span style="display:block;" id="fig:fig-dev-optimal"></span>
-<img src="{{< blogdown/postref >}}index_files/figure-html/fig-dev-optimal-1.png" alt="Potential deviation from optimal nutrient ratio when consuming different food items." width="672" />
+<img src="staticfig-dev-optimal-1.png" alt="Potential deviation from optimal nutrient ratio when consuming different food items." width="672" />
 <p class="caption">
-Figure 2: Potential deviation from optimal nutrient ratio when consuming different food items.
+Figure 1: Potential deviation from optimal nutrient ratio when consuming different food items.
 </p>
 </div>
-<p>To overcome the challenge explained above, we can use the magnitudes of differences between the optimal slope <span class="math inline">\(s\\{optimal} =\frac{optimal{Nutrient1}}{optimal{Nutrient2}}\)</span> and the potential new slope that arises when consuming a particular item <span class="math inline">\(s\\{new} =\frac{potential{Nutrient1}}{potential{Nutrient2}}\)</span> . This can be done by using the log of the ratio between the new slope and the original slopes <span class="math inline">\(log(\frac{s\\{new}}{s\\{optimal}})\)</span> . Using this approach, the deviations become symmetrical and can be compared, as illustrated in Figure <a href="#fig:log-for-dev">3</a>.</p>
-<pre class="r"><code>snew &lt;- c(1/6:1, 2:6)
-s_opt_1 &lt;- 1
-s_opt_2 &lt;- 0.5
-plot(x = log(snew), y = log(snew/s_opt_1),
-     main = &quot;For optimal ratio of 1a:1b&quot;,
-     xaxt = &quot;n&quot;,
-     xlab = &quot;New ratio&quot;,
-     ylab = &quot;Deviation: log(s_new/s_optimal)&quot;)
-axis(side = 1, at = log(snew), labels = round(snew, 2),
-     las = 2)
-# Line for deviations
-lines(x = log(c(0.5, 1, 1, 1, 2)),
-            y = log(c(0.5, 0.5, 1, 2, 2)/s_opt_1),
-            lty = 1, col = &quot;red&quot;)
-# Optimal line
-lines(x = c(log(1), log(1)), y = c(log(min(snew)/1), log(max(snew)/1)),
-      lty = 2, col = &quot;grey20&quot;)</code></pre>
+<p>To overcome the challenge explained above, we can use the magnitudes of differences between the optimal slope <span class="math inline">\(s\\{optimal} =\frac{optimal{Nutrient1}}{optimal{Nutrient2}}\)</span> and the potential new slope that arises when consuming a particular item <span class="math inline">\(s\\{new} =\frac{potential{Nutrient1}}{potential{Nutrient2}}\)</span> . This can be done by using the log of the ratio between the new slope and the original slopes <span class="math inline">\(log(\frac{s\\{new}}{s\\{optimal}})\)</span> . Using this approach, the deviations become symmetrical and can be compared, as illustrated in Figure <a href="#fig:log-for-dev">2</a>.</p>
 <div class="figure"><span style="display:block;" id="fig:log-for-dev"></span>
-<img src="{{< blogdown/postref >}}index_files/figure-html/log-for-dev-1.png" alt="Potential deviation from optimal nutrient ratio when consuming different food items illustrated as magnitude of slope differences." width="672" />
+<img src="staticlog-for-dev-1.png" alt="Potential deviation from optimal nutrient ratio when consuming different food items illustrated as magnitude of slope differences." width="672" />
 <p class="caption">
-Figure 3: Potential deviation from optimal nutrient ratio when consuming different food items illustrated as magnitude of slope differences.
+Figure 2: Potential deviation from optimal nutrient ratio when consuming different food items illustrated as magnitude of slope differences.
 </p>
 </div>
 <p>The x-axis indicates the new ratio after consuming a food item with the vertical dashed line showing the optimal ratio. The y-axis illustrates the deviation calculated as described above. By using this approach the absolute value of the deviation between 1 (the optimal ratio) and the new ratio 1:2 (0.5) is the same as between the optimal ratio of 1 and the new ratio of 2:1 (2).</p>
@@ -100,20 +76,11 @@ deviation_{i, j, k} = log(\frac{slope_{optimal}}{slope_{i, j, k}})
 <p><span class="math display">\[
 P_{i, j, k} = (1 - (\frac{deviation_{i, j, k}}{threshold})^2) * availabilty_{i,k}
 \]</span></p>
-<p>Here, <span class="math inline">\(threshold\)</span> is the maximum tolerable deviation of the nutritional ratio compared to the optimal ratio before an individual stops feeding on a particular item. And <span class="math inline">\(availability_{i,k}\)</span> is the availability of food item <em>i</em> for individual <em>k</em>. Note that these are relative probabilities (or weights) calculated for each food item (per individual and feeding event) and they don’t sum up to 1 for each potential feeding event. In other words, if the deviation from the optimal value increases, the probability of selecting this specific food item decreases. The multiplication term for food availability <span class="math inline">\((1 - (\frac{deviation_{i, j, k}}{threshold})^2)\)</span> is illustrated in Figure <a href="#fig:fig-threshold">4</a> with different threshold values.</p>
-<pre class="r"><code>par(mfrow = c(1,2))
-curve((1 - (x/0.5)^2), from = -0.5, to = 0.5,
-      main = &quot;Threshold = 0.5&quot;,
-      xlab = &quot;Deviation from optimal nutrient value&quot;,
-      ylab = &quot;Multiplicator for food availability&quot;)
-curve((1 - (x/1)^2), from = -1, to = 1,
-      main = &quot;Threshold = 1&quot;,
-      xlab = &quot;Deviation from optimal nutrient value&quot;,
-      ylab = &quot;Multiplicator for food availability&quot;)</code></pre>
+<p>Here, <span class="math inline">\(threshold\)</span> is the maximum tolerable deviation of the nutritional ratio compared to the optimal ratio before an individual stops feeding on a particular item. And <span class="math inline">\(availability_{i,k}\)</span> is the availability of food item <em>i</em> for individual <em>k</em>. Note that these are relative probabilities (or weights) calculated for each food item (per individual and feeding event) and they don’t sum up to 1 for each potential feeding event. In other words, if the deviation from the optimal value increases, the probability of selecting this specific food item decreases. The multiplication term for food availability <span class="math inline">\((1 - (\frac{deviation_{i, j, k}}{threshold})^2)\)</span> is illustrated in Figure <a href="#fig:fig-threshold">3</a> with different threshold values.</p>
 <div class="figure"><span style="display:block;" id="fig:fig-threshold"></span>
-<img src="{{< blogdown/postref >}}index_files/figure-html/fig-threshold-1.png" alt="Weight of multiplication term for food availability with different threshold values." width="864" />
+<img src="staticfig-threshold-1.png" alt="Weight of multiplication term for food availability with different threshold values." width="864" />
 <p class="caption">
-Figure 4: Weight of multiplication term for food availability with different threshold values.
+Figure 3: Weight of multiplication term for food availability with different threshold values.
 </p>
 </div>
 </div>
@@ -305,12 +272,12 @@ gf_df1 &lt;- geometric_framework(items_nutrients = items_nutrients,
   
 head(gf_df1)</code></pre>
 <pre><code>##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
-## 1             1          1         1         1            3
-## 2             2          1         4         2            1
-## 3             3          1         7         3            1
-## 4             4          1         8         4            3
-## 5             5          1         9         5            3
-## 6             6          1        10         6            3</code></pre>
+## 1             1          1         3         1            1
+## 2             2          1         4         4            2
+## 3             3          1         7         5            1
+## 4             4          1         8         8            2
+## 5             5          1        11         9            1
+## 6             6          1        14        10            1</code></pre>
 <p>We illustrate the nutrient acquisition over feeding events with equally highly available items in the individuals environment.</p>
 <pre class="r"><code>ggplot() +
   geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
@@ -322,12 +289,12 @@ head(gf_df1)</code></pre>
        x = &quot;Units Proteins&quot;,
        y = &quot;Units Carbohydrates&quot;) </code></pre>
 <div class="figure"><span style="display:block;" id="fig:fig-acq-sc1"></span>
-<img src="{{< blogdown/postref >}}index_files/figure-html/fig-acq-sc1-1.png" alt="Scenario 1 (items are equally scare) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line" width="672" />
+<img src="staticfig-acq-sc1-1.png" alt="Scenario 1 (items are equally scare) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line" width="672" />
 <p class="caption">
-Figure 5: Scenario 1 (items are equally scare) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
+Figure 4: Scenario 1 (items are equally scare) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
 </p>
 </div>
-<p>Figure <a href="#fig:fig-acq-sc1">5</a> illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when all items are equally scarce in the environment. The nutritional goal of our simulated animals is to consume 2P:1C. We included two items (item 2 with 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C) that would lead to a higher protein consumption compared to the nutrient target.</p>
+<p>Figure <a href="#fig:fig-acq-sc1">4</a> illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when all items are equally scarce in the environment. The nutritional goal of our simulated animals is to consume 2P:1C. We included two items (item 2 with 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C) that would lead to a higher protein consumption compared to the nutrient target.</p>
 <p>When animals experience food scarcity they are not able to maintain their target ratio, but still consume more units proteins than expected by the relative availability. Especially in the first few feeding events, when the total nutrient acquisition is still low, they stay closer to the target ratio compared to later feeding events when already many nutrients have been consumed. Individuals become less selective the more total nutrients they have already consumed.</p>
 </div>
 <div id="scenario-2-only-item-1-abundant" class="section level3">
@@ -349,27 +316,30 @@ head(gf_df2)</code></pre>
 <pre><code>##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
 ## 1             1          1         3         1            1
 ## 2             2          1         6         2            1
-## 3             3          1         7         3            3
-## 4             4          1        10         4            1
-## 5             5          1        13         5            1
-## 6             6          1        14         6            3</code></pre>
+## 3             3          1         9         3            1
+## 4             4          1        12         4            1
+## 5             5          1        13         7            2
+## 6             6          1        14         8            3</code></pre>
 <p>We illustrate the nutrient acquisition over feeding events with only item 1, which has a high protein content and is abundant in the individuals’ environment. The remaining items are scarce.</p>
-<pre class="r"><code>ggplot() +
+<pre class="r"><code>sc2 &lt;- ggplot() +
   geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
              alpha = 0.7, data = gf_df2) +
   geom_line(aes(x = optimal_protein, y = optimal_carbohydrates)) +
     ylim(0, 200) +
-  theme(legend.position = &quot;none&quot;) +
+  theme(legend.position = &quot;none&quot;)
+# ggsave(&quot;featured.png&quot;, sc2, width = 7, height = 4)
+sc2 &lt;- sc2 +
   labs(title = &quot;Nutrient acquisition when only item 1 (3P:1C) is abundant&quot;,
        x = &quot;Units Proteins&quot;,
-       y = &quot;Units Carbohydrates&quot;)</code></pre>
+       y = &quot;Units Carbohydrates&quot;)
+sc2</code></pre>
 <div class="figure"><span style="display:block;" id="fig:fig-acq-sc2"></span>
-<img src="{{< blogdown/postref >}}index_files/figure-html/fig-acq-sc2-1.png" alt="Scenario 2 (only item 1 (3P:1C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line" width="672" />
+<img src="staticfig-acq-sc2-1.png" alt="Scenario 2 (only item 1 (3P:1C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line" width="672" />
 <p class="caption">
-Figure 6: Scenario 2 (only item 1 (3P:1C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
+Figure 5: Scenario 2 (only item 1 (3P:1C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
 </p>
 </div>
-<p>Figre <a href="#fig:fig-acq-sc2">6</a> illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates (3P:1C), is abundant in the environment. The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C ) that would lead to a higher protein consumption compared to the nutrient target.</p>
+<p>Figre <a href="#fig:fig-acq-sc2">5</a> illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates (3P:1C), is abundant in the environment. The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C ) that would lead to a higher protein consumption compared to the nutrient target.</p>
 <p>If animals are provided with enough protein sources (item 1 abundant) they maintain their target ratio. Especially in the first few feeding events, when the total nutrient acquisition is still low, staying close to the target ratio is more important than in later feeding events when already many nutrients have been consumed. As before, individuals become less picky the more they have consumed.</p>
 </div>
 <div id="scenario-3-only-item-2-abundant" class="section level3">
@@ -388,12 +358,12 @@ gf_df3 &lt;- geometric_framework(items_nutrients = items_nutrients,
 
 head(gf_df3)</code></pre>
 <pre><code>##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
-## 1             1          1         1         1            3
-## 2             2          1         4         2            1
-## 3             3          1         5         5            2
+## 1             1          1         3         1            1
+## 2             2          1         4         4            2
+## 3             3          1         5         5            3
 ## 4             4          1         8         6            1
 ## 5             5          1        11         7            1
-## 6             6          1        12         8            3</code></pre>
+## 6             6          1        12        10            2</code></pre>
 <p>We illustrate the nutrient acquisition over feeding events with only item 2, which has a high carbohydrate content and is abundant in the individuals’ environment. The remaining items are scarce.</p>
 <pre class="r"><code>ggplot() +
   geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
@@ -405,12 +375,12 @@ head(gf_df3)</code></pre>
        x = &quot;Units Proteins&quot;,
        y = &quot;Units Carbohydrates&quot;)</code></pre>
 <div class="figure"><span style="display:block;" id="fig:fig-acq-sc3"></span>
-<img src="{{< blogdown/postref >}}index_files/figure-html/fig-acq-sc3-1.png" alt="Scenario 3 (only item 2 (1P:3C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line" width="672" />
+<img src="staticfig-acq-sc3-1.png" alt="Scenario 3 (only item 2 (1P:3C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line" width="672" />
 <p class="caption">
-Figure 7: Scenario 3 (only item 2 (1P:3C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
+Figure 6: Scenario 3 (only item 2 (1P:3C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line
 </p>
 </div>
-<p>Figure <a href="#fig:fig-acq-sc3">7</a> illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates, is abundant in the environment.The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with 3P:1C) that would lead to a higher protein consumption compared to the nutrient target.</p>
+<p>Figure <a href="#fig:fig-acq-sc3">6</a> illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates, is abundant in the environment.The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with 3P:1C) that would lead to a higher protein consumption compared to the nutrient target.</p>
 <p>If animals are limited in their protein source (item 1 scarce) and primarily encounter carbohydrates while moving through their nutritional landscape (only item 2 abundant) they can’t maintain their target ratio and over consume carbohydrates.</p>
 </div>
 </div>

@@ -2,26 +2,15 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Authors | Behaviour | Environment | Data</title>
-    <link>/authors/</link>
-      <atom:link href="/authors/index.xml" rel="self" type="application/rss+xml" />
+    <link>https://bedatablog.netlify.com/authors/</link>
+      <atom:link href="https://bedatablog.netlify.com/authors/index.xml" rel="self" type="application/rss+xml" />
     <description>Authors</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2020</copyright>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>© Urs Kalbitzer 2023</copyright>
     <image>
-      <url>/img/icon-192.png</url>
+      <url>https://bedatablog.netlify.com/img/icon-192.png</url>
       <title>Authors</title>
-      <link>/authors/</link>
+      <link>https://bedatablog.netlify.com/authors/</link>
     </image>
-    
-    <item>
-      <title></title>
-      <link>/authors/admin/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/authors/admin/</guid>
-      <description>&lt;p&gt;For my research, I analyze behavioural, ecological, geographic, socio-economic and other types of data. Usually, the first steps are to figure out how and from where to get the data (if they are publicly available), to do some first cleaning and pre-processing, and then to test potential methods to obtain insights from the data.&lt;br&gt;
-Since I very often benefit from other blogs while working with data, and because I am absolutely fascinated about all the possibilities that arise from public data and open source tools, my aim for this blog is to share some of my data projects. My hope is that other people benefit from this blog just as I benefit from all the great resources made available by other people.&lt;/p&gt;
-&lt;p&gt;For more information about my research, please look at my &lt;a href=&#34;https://urskalbitzer.github.io&#34;&gt;webpage&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
     
   </channel>
 </rss>

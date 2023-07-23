@@ -10,7 +10,12 @@ subtitle: ''
 summary: ''
 authors: []
 lastmod: "2023-07-23 16:23:27 CEST"
-featured: no
+featured: yes
+image:
+  placement: 1
+  caption: ''
+  focal_point: 'Center'
+  preview_only: no
 projects: []
 commentable: true
 bibliography: references.bib
@@ -19,53 +24,52 @@ toc: true
 number-sections: true
 ---
 
-Conception, Idea, and Writing: Patrick Lauer and Urs Kalbitzer. Realization and Programming: Patrick Lauer.
+*Conception, Idea, and Writing: Patrick Lauer and Urs Kalbitzer. Realization and Programming: Patrick Lauer.*
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.path = "static")
+```
 
 ## Introduction
 
-Animals forage to meet their nutritional needs while avoiding potentially harmful components, such as toxins. **Geometric Framework Models**, which have gained popularity in recent years, provide a framework that takes into account that there is rarely one single resource that satisfies an animal's nutritional requirements and animals have to balance the consumption of different food resources with different nutritional compositions [@simpson2011; @lambert2015]. Thus, following Geometric Framework Models, the selection of food resources is not just based on general preferences for specific food items and their availability in the environment. Rather it depends on the animal's nutritional goals, the composition (i.e. nutrients, harmful components) as well as the availability of food resources, and the animal's current nutritional state (i.e. which nutrients have recently been consumed), see Figure \@ref(fig:diagram).
+Animals forage to meet their nutritional needs while avoiding potentially harmful components, such as toxins. **Geometric Framework Models**, which have gained popularity in recent years, provide a framework that takes into account that there is rarely one single resource that satisfies an animal's nutritional requirements and animals have to balance the consumption of different food resources with different nutritional compositions [@simpson2011; @lambert2015]. Thus, following Geometric Framework Models, the selection of food resources is not just based on general preferences for specific food items and their availability in the environment. Rather it depends on the animal's nutritional goals, the composition (i.e. nutrients, harmful components) as well as the availability of food resources, and the animal's current nutritional state (i.e. which nutrients have recently been consumed):
+
+```{r diagram, fig.cap = "Diagram illustrating the assumptions simulated for Geometric Framework Models. The red coloured boxes highlight set parameters in the simulation.", echo=FALSE, results = "asis"}
+# diagram <- DiagrammeR::grViz("digraph flowchart {
+#   node [shape=box, style = filled];
+# 
+#     7 [label = 'Electivity Scores', fillcolor = PaleGreen]
+# 
+#   node[fillcolor = LightCoral]
+#     2 [label = 'Availability of Food Resources in the Environment'];
+#     3 [label = 'Composition of Food Resources'];
+#     4 [label = 'Overall Nutritional Goals'];
+# 
+#   node[fillcolor = lightblue]
+#     1 [label = 'Diet'];
+#     6 [label = 'Subjective Availability of Food Resources'];
+#     5 [label = 'Current Nutritional State'];
+# 
+#     2 -> 6[arrowhead = 'none'];
+#     6 -> 1;
+#     3 -> 1;
+#     4 -> 1;
+#     5 -> 1;
+#     1 -> 5;
+#     1 -> 7;
+#     2 -> 7;
+# 
+# subgraph {
+#  rank = same; 2; 3; 4;}}")
+# diagram = DiagrammeRsvg::export_svg(diagram)
+# diagram = charToRaw(diagram) # flatten
+# rsvg::rsvg_png(diagram, "diagram.png")
+cat("![](diagram.png)")
+```
 
 Empirical studies on animal foraging behavior often focus on estimating preferences for different food items, which is usually done by calculating **electivity indices** [@manly2007]. Such indices have been developed with the assumption that animals consume different food items proportionally to their preferences for, and the availability of, the different items in the environment. This, however, hardly captures the complex decision-making processes involved in foraging.
 
 Assuming that Geometric Framework Models better reflect animal foraging decisions than just preference models, the applicability of such electivity indices is unclear. Therefore, **we here simulate animals foraging according to such Geometric Framework Models to explore nutrient acquisition in different scenarios** **(Part 1), and then calculate electivity indices based on the observed consumption of different food items to compare these indices with what we know about the foraging behavior of our simulated animals (Part 2).**
-
-```{r diagram, fig.cap = "Diagram illustrating the assumptions simulated for Geometric Framework Models. The red coloured boxes highlight set parameters in the simulation.", echo=FALSE}
-library(DiagrammeR)
-
-grViz("
- digraph flowchart {
-  node [shape=box, style = filled];
-   
-    7 [label = 'Electivity Scores', fillcolor = PaleGreen]
-
-  node[fillcolor = LightCoral]
-    2 [label = 'Availability of Food Resources in the Environment'];
-    3 [label = 'Composition of Food Resources'];
-    4 [label = 'Overall Nutritional Goals'];
-   
-  node[fillcolor = lightblue]
-    1 [label = 'Diet'];
-    6 [label = 'Subjective Availability of Food Resources'];
-    5 [label = 'Current Nutritional State'];
-    
-
-    2 -> 6[arrowhead = 'none'];
-    6 -> 1;
-    3 -> 1;
-    4 -> 1;
-    5 -> 1;
-    1 -> 5;
-    1 -> 7;
-    2 -> 7;
-    
-subgraph {
- rank = same; 2; 3; 4;
- } 
-  }
-  
-")
-```
-
 ## General concept of the simulation
 
 The basic idea is that the (simulated) animals have an **optimal, or target, ratio** of different nutrients, for example a ratio of proteins (P) to carbohydrates (C) of **1P:1C**. There are **different food items** in the environment, and these items vary with regard to their **nutritional content**, for example item A has 3 units protein and 1 unit carbohydrates (= 3P:1C), whereas another item B has 1 unit proteins and 3 units carbohydrates (= 1P:3C). Thus, **neither item will allow an animal to stay close to their target ratio of 1P:1C** and they have to feed from both items. In other words, after each feeding event, the ratio of consumed nutrients will deviate from the target ratio in one or another direction. This affects which food item should be eaten next. However, in our simulation (and in nature), different items can vary with regard to their **availability**, it is thereby 'easier' for animals to consume more abundant items. This means that which item is selected in each feeding event depends on *(i)* how much the ratio of consumed nutrients would deviate from the target ratio after eating that item and *(ii)* the availability of different food items.
@@ -94,7 +98,6 @@ As described above, for each potentially consumed food item, the deviation from 
 
 # Create Plot 1
 {
-  
 plot(NA,
      xlim = c(0, 5.5),
      ylim = c(0, 5.5),
@@ -130,7 +133,7 @@ text(x = xc, y = yc + 0.1, pos = 3,
 
 To overcome the challenge explained above, we can use the magnitudes of differences between the optimal slope $s\\{optimal} =\frac{optimal{Nutrient1}}{optimal{Nutrient2}}$ and the potential new slope that arises when consuming a particular item $s\\{new} =\frac{potential{Nutrient1}}{potential{Nutrient2}}$ . This can be done by using the log of the ratio between the new slope and the original slopes $log(\frac{s\\{new}}{s\\{optimal}})$ . Using this approach, the deviations become symmetrical and can be compared, as illustrated in Figure \@ref(fig:log-for-dev).
 
-```{r log-for-dev, fig.cap = "Potential deviation from optimal nutrient ratio when consuming different food items illustrated as magnitude of slope differences."}
+```{r log-for-dev, fig.cap = "Potential deviation from optimal nutrient ratio when consuming different food items illustrated as magnitude of slope differences.", echo=FALSE}
 snew <- c(1/6:1, 2:6)
 s_opt_1 <- 1
 s_opt_2 <- 0.5
@@ -172,7 +175,7 @@ $$
 
 Here, $threshold$ is the maximum tolerable deviation of the nutritional ratio compared to the optimal ratio before an individual stops feeding on a particular item. And $availability_{i,k}$ is the availability of food item *i* for individual *k*. Note that these are relative probabilities (or weights) calculated for each food item (per individual and feeding event) and they don't sum up to 1 for each potential feeding event. In other words, if the deviation from the optimal value increases, the probability of selecting this specific food item decreases. The multiplication term for food availability $(1 - (\frac{deviation_{i, j, k}}{threshold})^2)$ is illustrated in Figure \@ref(fig:fig-threshold) with different threshold values.
 
-```{r fig-threshold, fig.cap = "Weight of multiplication term for food availability with different threshold values.", fig.width = 9, fig.height = 5}
+```{r fig-threshold, fig.cap = "Weight of multiplication term for food availability with different threshold values.", fig.width = 9, fig.height = 5, echo = FALSE}
 par(mfrow = c(1,2))
 curve((1 - (x/0.5)^2), from = -0.5, to = 0.5,
       main = "Threshold = 0.5",
@@ -431,15 +434,18 @@ We illustrate the nutrient acquisition over feeding events with only item 1, whi
 
 ```{r fig-acq-sc2, fig.cap = "Scenario 2 (only item 1 (3P:1C) is abundant) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line", warning = FALSE}
 
-ggplot() +
+sc2 <- ggplot() +
   geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
              alpha = 0.7, data = gf_df2) +
   geom_line(aes(x = optimal_protein, y = optimal_carbohydrates)) +
     ylim(0, 200) +
-  theme(legend.position = "none") +
+  theme(legend.position = "none")
+# ggsave("featured.png", sc2, width = 7, height = 4)
+sc2 <- sc2 +
   labs(title = "Nutrient acquisition when only item 1 (3P:1C) is abundant",
        x = "Units Proteins",
        y = "Units Carbohydrates")
+sc2
 ```
 
 Figre \@ref(fig:fig-acq-sc2) illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates (3P:1C), is abundant in the environment. The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C ) that would lead to a higher protein consumption compared to the nutrient target.
