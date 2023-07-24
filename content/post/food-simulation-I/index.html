@@ -35,8 +35,10 @@ number-sections: true
 <p>Animals forage to meet their nutritional needs while avoiding potentially harmful components, such as toxins. <strong>Geometric Framework Models</strong>, which have gained popularity in recent years, provide a framework that takes into account that there is rarely one single resource that satisfies an animal’s nutritional requirements and animals have to balance the consumption of different food resources with different nutritional compositions <span class="citation">(<a href="#ref-lambert2015">Lambert &amp; Rothman, 2015</a>; <a href="#ref-simpson2011">Simpson &amp; Raubenheimer, 2011</a>)</span>. Thus, following Geometric Framework Models, the selection of food resources is not just based on general preferences for specific food items and their availability in the environment. Rather it depends on the animal’s nutritional goals, the composition (i.e. nutrients, harmful components) as well as the availability of food resources, and the animal’s current nutritional state (i.e. which nutrients have recently been consumed):</p>
 <p><img src="diagram.png" /></p>
 <p>Empirical studies on animal foraging behavior often focus on estimating preferences for different food items, which is usually done by calculating <strong>electivity indices</strong> <span class="citation">(<a href="#ref-manly2007">Manly et al., 2007</a>)</span>. Such indices have been developed with the assumption that animals consume different food items proportionally to their preferences for, and the availability of, the different items in the environment. This, however, hardly captures the complex decision-making processes involved in foraging.</p>
-<p>Assuming that Geometric Framework Models better reflect animal foraging decisions than just preference models, the applicability of such electivity indices is unclear. Therefore, <strong>we here simulate animals foraging according to such Geometric Framework Models to explore nutrient acquisition in different scenarios</strong> <strong>(Part 1), and then calculate electivity indices based on the observed consumption of different food items to compare these indices with what we know about the foraging behavior of our simulated animals (Part 2).</strong>
-## General concept of the simulation</p>
+<p>Assuming that Geometric Framework Models better reflect animal foraging decisions than just preference models, the applicability of such electivity indices is unclear. Therefore, <strong>we here simulate animals foraging according to such Geometric Framework Models to explore nutrient acquisition in different scenarios</strong> <strong>(Part 1), and then calculate electivity indices based on the observed consumption of different food items to compare these indices with what we know about the foraging behavior of our simulated animals (Part 2).</strong></p>
+</div>
+<div id="general-concept-of-the-simulation" class="section level2">
+<h2>General concept of the simulation</h2>
 <p>The basic idea is that the (simulated) animals have an <strong>optimal, or target, ratio</strong> of different nutrients, for example a ratio of proteins (P) to carbohydrates (C) of <strong>1P:1C</strong>. There are <strong>different food items</strong> in the environment, and these items vary with regard to their <strong>nutritional content</strong>, for example item A has 3 units protein and 1 unit carbohydrates (= 3P:1C), whereas another item B has 1 unit proteins and 3 units carbohydrates (= 1P:3C). Thus, <strong>neither item will allow an animal to stay close to their target ratio of 1P:1C</strong> and they have to feed from both items. In other words, after each feeding event, the ratio of consumed nutrients will deviate from the target ratio in one or another direction. This affects which food item should be eaten next. However, in our simulation (and in nature), different items can vary with regard to their <strong>availability</strong>, it is thereby ‘easier’ for animals to consume more abundant items. This means that which item is selected in each feeding event depends on <em>(i)</em> how much the ratio of consumed nutrients would deviate from the target ratio after eating that item and <em>(ii)</em> the availability of different food items.</p>
 <p>This simulation is done using the function <code>geometric_framework()</code>, for which the code is provided below. For each individual, the simulation runs through <em>n</em> feeding events. For each feeding event, the function calculates the cumulative units of each nutrient that would be consumed if a particular food item was eaten, and how much the new nutrient ratio would deviate from the target ratio. Based on this deviation and the availability of the item, the function calculates the relative probability of consuming each item, which is then used to determine which item is actually consumed (more details are provided below). The cumulative nutrient units consumed are updated for that individual after each feeding event.</p>
 <p>This simulation is done for a given number of individuals, which currently all have the same nutritional target. Furthermore, all individuals can feed on the same food items, each item with a defined content of different nutrients. However, we simulate inter-individual variability in the availability of food items (subjective food availability) to mimic natural variation between individuals due to differences in feeding position, cognitive capacities (i.e., skills to find and utilize specific items) and other factors. This variability is realized using a beta-distribution. The function can be used to simulate different kinds of scenarios to explore how animals would move through their nutritional landscapes.</p>
@@ -273,11 +275,11 @@ gf_df1 &lt;- geometric_framework(items_nutrients = items_nutrients,
 head(gf_df1)</code></pre>
 <pre><code>##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
 ## 1             1          1         3         1            1
-## 2             2          1         4         4            2
-## 3             3          1         7         5            1
-## 4             4          1         8         8            2
-## 5             5          1        11         9            1
-## 6             6          1        14        10            1</code></pre>
+## 2             2          1         4         2            3
+## 3             3          1         5         3            3
+## 4             4          1         6         4            3
+## 5             5          1         9         5            1
+## 6             6          1        10         8            2</code></pre>
 <p>We illustrate the nutrient acquisition over feeding events with equally highly available items in the individuals environment.</p>
 <pre class="r"><code>ggplot() +
   geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
@@ -315,11 +317,11 @@ gf_df2 &lt;- geometric_framework(items_nutrients = items_nutrients,
 head(gf_df2)</code></pre>
 <pre><code>##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
 ## 1             1          1         3         1            1
-## 2             2          1         6         2            1
-## 3             3          1         9         3            1
-## 4             4          1        12         4            1
-## 5             5          1        13         7            2
-## 6             6          1        14         8            3</code></pre>
+## 2             2          1         4         2            3
+## 3             3          1         7         3            1
+## 4             4          1        10         4            1
+## 5             5          1        13         5            1
+## 6             6          1        16         6            1</code></pre>
 <p>We illustrate the nutrient acquisition over feeding events with only item 1, which has a high protein content and is abundant in the individuals’ environment. The remaining items are scarce.</p>
 <pre class="r"><code>sc2 &lt;- ggplot() +
   geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
@@ -358,12 +360,12 @@ gf_df3 &lt;- geometric_framework(items_nutrients = items_nutrients,
 
 head(gf_df3)</code></pre>
 <pre><code>##   Feeding_event Individual Nutrient1 Nutrient2 Item_in_diet
-## 1             1          1         3         1            1
-## 2             2          1         4         4            2
-## 3             3          1         5         5            3
-## 4             4          1         8         6            1
-## 5             5          1        11         7            1
-## 6             6          1        12        10            2</code></pre>
+## 1             1          1         1         1            3
+## 2             2          1         2         2            3
+## 3             3          1         3         3            3
+## 4             4          1         6         4            1
+## 5             5          1         9         5            1
+## 6             6          1        10         8            2</code></pre>
 <p>We illustrate the nutrient acquisition over feeding events with only item 2, which has a high carbohydrate content and is abundant in the individuals’ environment. The remaining items are scarce.</p>
 <pre class="r"><code>ggplot() +
   geom_point(aes(x = Nutrient1, y = Nutrient2, color = Individual),
