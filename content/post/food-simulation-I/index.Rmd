@@ -393,7 +393,7 @@ gf_df1 <- geometric_framework(items_nutrients = items_nutrients,
 head(gf_df1)
 ```
 
-We illustrate the nutrient acquisition over feeding events with equally highly available items in the individuals environment.
+We illustrate the nutrient acquisition over feeding events with equally scarce items in the individuals environment.
 
 ```{r fig-acq-sc1, fig.cap = "Scenario 1 (items are equally scare) nutrient acquisition. The plot shows the acquisition of proteins on the x-axis in relation to the acquisition of carbohydrates on the y-axis over feeding events. The individuals nutrient acquisition is highlighted as dots. Different colors distinguish the simulated individuals. The nutritional goal of the individuals is highlighted as black line", warning = FALSE}
 ggplot() +
@@ -449,7 +449,7 @@ sc2 <- sc2 +
 sc2
 ```
 
-Figre \@ref(fig:fig-acq-sc2) illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates (3P:1C), is abundant in the environment. The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C ) that would lead to a higher protein consumption compared to the nutrient target.
+Figre \@ref(fig:fig-acq-sc2) illustrates the cumulative nutrient acquisition of our simulated individuals when only item 1, which provides the highest ratio of proteins compared to carbohydrates (3P:1C), is abundant in the environment. The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with a 3P:1C ) that would lead to a higher protein consumption compared to the nutrient target.
 
 If animals are provided with enough protein sources (item 1 abundant) they maintain their target ratio. Especially in the first few feeding events, when the total nutrient acquisition is still low, staying close to the target ratio is more important than in later feeding events when already many nutrients have been consumed. As before, individuals become less picky the more they have consumed.
 
@@ -487,9 +487,9 @@ ggplot() +
        y = "Units Carbohydrates")
 ```
 
-Figure \@ref(fig:fig-acq-sc3) illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 1, which provides the highest ratio of proteins compared to carbohydrates, is abundant in the environment.The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with 3P:1C) that would lead to a higher protein consumption compared to the nutrient target.
+Figure \@ref(fig:fig-acq-sc3) illustrates that the cumulative nutrient acquisition of our simulated individuals deviates from the target ratio when only item 2, which provides the highest ratio of carbohydrates compared to proteins, is abundant in the environment.The nutritional goal of our simulated animals is to consume proteins and carbohydrates in a 2 to 1 ratio. We included two items (item 2 with a 1P:3C and item 3 with 1P:1C) that would lead to a higher carbohydrate consumption compared to the nutrient target, and one item (item 1 with 3P:1C) that would lead to a higher protein consumption compared to the nutrient target.
 
-If animals are limited in their protein source (item 1 scarce) and primarily encounter carbohydrates while moving through their nutritional landscape (only item 2 abundant) they can't maintain their target ratio and over consume carbohydrates.
+If animals are limited in their protein source (item 1 scarce) and primarily encounter carbohydrates while moving through their nutritional landscape (only item 2 abundant) they can't maintain their target ratio and overconsume carbohydrates.
 
 ## Summary
 
